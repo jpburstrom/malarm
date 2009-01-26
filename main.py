@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2007 Johannes Burström, <johannes@ljud.org>
+# Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision: 70 $"
 
 

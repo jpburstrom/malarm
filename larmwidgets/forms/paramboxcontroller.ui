@@ -1,0 +1,301 @@
+<ui version="4.0" >
+ <class>Form</class>
+ <widget class="QWidget" name="Form" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>408</width>
+    <height>52</height>
+   </rect>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <property name="spacing" >
+      <number>1</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="mainLabel" >
+       <property name="font" >
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="frameShape" >
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="text" >
+        <string>Machine Name</string>
+       </property>
+       <property name="scaledContents" >
+        <bool>false</bool>
+       </property>
+       <property name="indent" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="presetComboBox" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="editable" >
+        <bool>true</bool>
+       </property>
+       <property name="maxVisibleItems" >
+        <number>20</number>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Preset name 1</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <property name="spacing" >
+      <number>1</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_1" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_2" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_3" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>3</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_4" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>4</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2" >
+       <property name="frameShadow" >
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_A" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ParamBoxControllerSlider" name="snapshotSlider" >
+       <property name="maximum" >
+        <number>1000</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition" >
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+       <property name="tickInterval" >
+        <number>500</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="snapshotButton_B" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>10</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>B</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox" >
+       <property name="minimumSize" >
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>1677215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="sizeAdjustPolicy" >
+        <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+       </property>
+       <property name="frame" >
+        <bool>false</bool>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Randomize</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Misinterpret</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ParamBoxControllerSlider</class>
+   <extends>QSlider</extends>
+   <header>paramboxcontrollerslider.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

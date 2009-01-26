@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Tasks SYSTEM "Tasks-4.1.dtd">
+<!-- eric4 tasks file for project newlarm -->
+<!-- Saved: 2009-01-26, 22:02:47 -->
+<Tasks version="4.1">
+  <Task priority="1" completed="False" bugfix="False">
+    <Summary>TODO: drag and drop copy values</Summary>
+    <Description></Description>
+    <Created>2009-01-09, 21:56:36</Created>
+    <Resource>
+      <Filename>
+        <Name>tabletest.py</Name>
+      </Filename>
+      <Linenumber>251</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" bugfix="False">
+    <Summary>TODO: update preset menu on sibling delete</Summary>
+    <Description></Description>
+    <Created>2009-01-26, 22:02:45</Created>
+    <Resource>
+      <Filename>
+        <Name>param.py</Name>
+      </Filename>
+      <Linenumber>6</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" bugfix="False">
+    <Summary>TODO: list operations on _Param...</Summary>
+    <Description></Description>
+    <Created>2009-01-26, 22:02:45</Created>
+    <Resource>
+      <Filename>
+        <Name>param.py</Name>
+      </Filename>
+      <Linenumber>44</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" bugfix="True">
+    <Summary>FIXME: Inte säker på om det här är sättet att göra det på...</Summary>
+    <Description></Description>
+    <Created>2009-01-26, 22:02:45</Created>
+    <Resource>
+      <Filename>
+        <Name>param.py</Name>
+      </Filename>
+      <Linenumber>116</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" bugfix="True">
+    <Summary>FIXME: this doesn't work with numbers and other types mixed. The list gets truncated.</Summary>
+    <Description></Description>
+    <Created>2009-01-26, 22:02:45</Created>
+    <Resource>
+      <Filename>
+        <Name>param.py</Name>
+      </Filename>
+      <Linenumber>477</Linenumber>
+    </Resource>
+  </Task>
+</Tasks>

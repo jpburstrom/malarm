@@ -1,0 +1,5 @@
+name = newlarm
+[fff]
+controller = GENERIC_EXECUTION
+default = True
+command = python %s

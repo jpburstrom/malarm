@@ -1,0 +1,86 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Larm2</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" />
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionQuit" />
+   </widget>
+   <widget class="QMenu" name="menuConnections" >
+    <property name="title" >
+     <string>&amp;Project</string>
+    </property>
+    <addaction name="actionChoose_project" />
+    <addaction name="separator" />
+    <addaction name="actionEdit_params" />
+    <addaction name="actionEdit_Ui" />
+    <addaction name="actionEdit_Shortcuts" />
+    <addaction name="actionEdit_Receivers" />
+    <addaction name="separator" />
+    <addaction name="action_Rebuild" />
+   </widget>
+   <addaction name="menuFile" />
+   <addaction name="menuConnections" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <action name="actionQuit" >
+   <property name="text" >
+    <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="actionEdit_params" >
+   <property name="text" >
+    <string>&amp;Edit params</string>
+   </property>
+  </action>
+  <action name="actionChoose_project" >
+   <property name="text" >
+    <string>&amp;Choose project</string>
+   </property>
+  </action>
+  <action name="action_Rebuild" >
+   <property name="text" >
+    <string>&amp;Rebuild</string>
+   </property>
+  </action>
+  <action name="actionEdit_Ui" >
+   <property name="text" >
+    <string>Edit &amp;UI</string>
+   </property>
+  </action>
+  <action name="actionEdit_Shortcuts" >
+   <property name="text" >
+    <string>Edit &amp;Shortcuts</string>
+   </property>
+  </action>
+  <action name="actionEdit_Receivers" >
+   <property name="text" >
+    <string>Edit Receivers</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

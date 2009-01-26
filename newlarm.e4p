@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-4.2.dtd">
+<!-- eric4 project file for project newlarm -->
+<!-- Saved: 2009-01-10, 01:34:39 -->
+<!-- Copyright (C) 2009 Johannes Burström, johannes@ljud.org -->
+<Project version="4.2">
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <ProjectType>Qt4</ProjectType>
+  <Description></Description>
+  <Version>0.1</Version>
+  <Author>Johannes Burström</Author>
+  <Email>johannes@ljud.org</Email>
+  <Sources>
+    <Source>
+      <Name>tabletest.py</Name>
+    </Source>
+    <Source>
+      <Name>param.py</Name>
+    </Source>
+    <Source>
+      <Name>qtosc.py</Name>
+    </Source>
+    <Source>
+      <Name>tabletestUI.py</Name>
+    </Source>
+    <Source>
+      <Name>main.py</Name>
+    </Source>
+  </Sources>
+  <Forms>
+    <Form>
+      <Name>tabletest.ui</Name>
+    </Form>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Resources>
+  </Resources>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <MainScript>
+    <Name>main.py</Name>
+  </MainScript>
+  <Vcs>
+    <VcsType>None</VcsType>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.ui" type="FORMS" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+    <FiletypeAssociation pattern="*.pyw" type="SOURCES" />
+    <FiletypeAssociation pattern="*.ui.h" type="FORMS" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+    <FiletypeAssociation pattern="*.qrc" type="RESOURCES" />
+  </FiletypeAssociations>
+</Project>

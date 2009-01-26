@@ -1,0 +1,27 @@
+global functions:
+onoff       bool
+fade in     Bang/float?
+fade out    Bang/float?
+volume      float
+pan         float
+
+#####
+# Post-everything filters
+#
+lpf freq    float
+lpf res     float
+lpf onoff   bool
+hpf freq    float
+hpf res     float
+hpf onoff   bool
+
+#####
+#Lfo:s, routable to suitable parameters in machines...
+
+lfo1 freq   float
+lfo1 wave   enum (int)
+lfo2 freq   float
+lfo2 wave   enum (int)
+...
+
+

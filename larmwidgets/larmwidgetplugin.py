@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright 2008 Johannes Burström, <johannes@ljud.org>
-__version__ = "$Revision: 70 $"
+__version__ = "$Revision$"
 
 from PyQt4 import QtCore, QtGui, QtDesigner
 #from paramwidgets import ParamSpinBox, ParamPushButton, ParamProgress, ParamToggleButton, ParamThreeStateButton, ParamLineEdit, ParamLabel

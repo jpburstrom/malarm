@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright 2009 Johannes Burström, <johannes@ljud.org>
-__version__ = "$Revision: 70 $"
+__version__ = "$Revision$"
 
 import os
 import sys

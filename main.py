@@ -3,6 +3,34 @@
 # Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
+#TODO: Create params from widget pyqtProperties. This is the only thing making sense.
+
+"""A system for creating OSC sending (and receiving) guis.
+
+malarm is an app-creating app created with Python and PyQt4. 
+The aim is to be able to rapidly create guis for sound (and other)
+applications which communicates with the Open Sound Control (OSC)
+protocol.  With hopefully as little work as possible (we
+all know this is not true) it can create apps with all the bells 
+& whistles we know from ordinary programs: Keyboard shortcuts, fancy widgets and
+state saving (presets).
+
+The workflow could be described like this: 
+
+    1. Make the gui with Qt's Designer.  There are custom widgets, 
+    which are later able to connect to the app's OSC sending machinery.
+
+    2. Create "params", small cells which has an OSC address, a type
+    and a state (in some cases also min/max values and default), and handles
+    all the dirty work. 
+    
+    3. Connect widgets to params. Certain widgets demand certain param
+    types (a slider sending out strings doesn't make much sense for now).
+
+    4. Rebuild and watch your new app spit out OSC goodness.
+
+"""
+
 
 import os
 import sys

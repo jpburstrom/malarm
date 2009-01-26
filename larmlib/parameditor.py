@@ -14,7 +14,11 @@ import datetime
 
 from PyQt4 import QtGui, QtCore, uic
 
+p = os.path.dirname(__file__)
+#A small hack for ui form to be compiled without complaining about missing mylineedit module...
+sys.path.append(p)
 MainUI, dummy = uic.loadUiType(os.path.join(os.path.dirname(__file__), "forms/parameditor.ui"))
+sys.path.remove(p)
 
 #TODO: update file writing to use persistance module
 
@@ -102,7 +106,8 @@ class ParamEditor(MainUI, QtGui.QDialog):
         if self.atoms[i][0] != "str":
             self.defaultSpinBox.setValue(self.atoms[i][1])
         else:
-            self.defaultEdit.setText(self.atoms[i][1])
+            #FIXME: something wrong when not having a string default, i think...
+            self.defaultEdit.setText(str(self.atoms[i][1]))
         self.typeComboBox.setCurrentIndex(self.typeComboBox.findText(self.atoms[i][0]))
         self.minSpinBox.setValue(self.atoms[i][2])
         self.maxSpinBox.setValue(self.atoms[i][3])

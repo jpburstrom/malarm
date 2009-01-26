@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/johannes/.larm2/default/gui.ui'
 #
-# Created: Mon Jan 26 23:08:13 2009
+# Created: Tue Jan 27 00:03:25 2009
 #      by: PyQt4 UI code generator 4.4.3
 #
 # WARNING! All changes made in this file will be lost!

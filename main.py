@@ -4,6 +4,8 @@
 __version__ = "$Revision$"
 
 #TODO: Create params from widget pyqtProperties. This is the only thing making sense.
+#TODO: ParamCHeckbox
+#TODO: make widgets usable without param connection (minmax+state)
 
 """A system for creating OSC sending (and receiving) guis.
 

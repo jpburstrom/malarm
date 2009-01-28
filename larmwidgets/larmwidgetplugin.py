@@ -6,6 +6,8 @@ __version__ = "$Revision$"
 from PyQt4 import QtCore, QtGui, QtDesigner
 #from paramwidgets import ParamSpinBox, ParamPushButton, ParamProgress, ParamToggleButton, ParamThreeStateButton, ParamLineEdit, ParamLabel
 from paramwidgets import *
+from larmlib import param
+from malarmtaskmenu import MalarmTaskMenuFactory
 
 #============================================================================#
 # The group name in designer widgetbox                                       #
@@ -23,6 +25,13 @@ class ParamSpinBoxPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def initialize(self, formEditor):
         if self.initialized:
             return
+        manager = formEditor.extensionManager()
+        if manager:
+            self.factory = MalarmTaskMenuFactory(manager)
+            manager.registerExtensions(
+                self.factory, "com.trolltech.Qt.Designer.TaskMenu"
+                )
+
         self.initialized = True
 
     def isInitialized(self):

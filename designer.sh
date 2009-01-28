@@ -1,4 +1,5 @@
 #!/bin/bash
 
 export PYQTDESIGNERPATH=./larmwidgets
-designer
+export PYTHONPATH=./
+designer $@

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2007 Johannes Burström, <johannes@ljud.org>
+# Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
 
@@ -108,13 +108,24 @@ class AbstractParamWidget(object):
         except AttributeError:
             self._length = 1
 
-        self._types = [float]
+        #Param coupled with widget
         self._param = None
+        #Types of widget. For most ordinary widgets, this is a 1-item list, but can be as many
+        #as wanted. Has to match the param.
+        self._types = [None]
+        #These are shared by the param (that is, the param passes the reference to its own
+        #_min and _max lists upon connection)
         self._min = [0 for i in range(self._length)]
         self._max = [1 for i in range(self._length)]
         self._state = None
-
+        
+        
         self._paramPath = ""
+        #These are used as pyqtProperties, to be set by designer.
+        #They update the param when connecting to it, making the param effectively stupid.
+        self._paramDefault = None
+        self._paramMin = [0 for i in range(self._length)]
+        self._paramMax = [1 for i in range(self._length)]
         
         self.paramUpdateSignal = "valueChanged(int)" #gets connected to Param setState method
 
@@ -126,11 +137,15 @@ class AbstractParamWidget(object):
         self.selectpalette.setColor(self.selectpalette.Base, QtGui.QColor("#ffbbaa"))
         self.selected = False
 
-    def getParams(self):
-        return self._params
-        
-    #hup?
-    params = property(getParams)
+    def getLength(self):
+        return self._length
+
+    length = property(getLength)
+
+    def getTypes(self):
+        return self._types
+
+    types = property(getTypes)
 
     def setParam(self, param):
         """Method called by the connected param, to set the props of the widget.
@@ -141,7 +156,18 @@ class AbstractParamWidget(object):
         """
         if param.typecheck(self._types):
             self._param = param
+            #FIXME: set min, max, default
             self.updateParamConnections()
+            #Pass on our own values to param
+            if self._length == 1:
+                self._paramMin = self._min[0]
+                self._paramMax = self._max[0]
+            self._param.setMinValue[self._min]
+            self._param.setMaxValue[self._min]
+            #And get them as references from param.
+            self._min = self._param.getMinReference()
+            self._max = self._param.getMaxReference()
+            self._state = self._param.getStateReference()
             self.connect(param, QtCore.SIGNAL("paramUpdate"), self.guiUpdate)
         else:
             raise TypeError, "Widget=>Param connection didn't work."
@@ -159,10 +185,6 @@ class AbstractParamWidget(object):
         elif i == p.UpdateMax:
             self.updateMax()
 
-    def updateParamConnections(self):
-        self._min = self._param.getMinReference()
-        self._max = self._param.getMaxReference()
-        self._state = self._param.getStateReference()
 
     def updateState(self):
         """Subclass this to set values for your widget"""
@@ -247,12 +269,78 @@ class AbstractParamWidget(object):
                     self._max[slot] - self._min[slot])  * scaleto
             
     def setParamPath(self, path):
+        """Set path of param.
+
+        This method is used by subclasses as setter/getter for a pyqtProperty.
+        It sets the OSC path currently associated with the widget.
+        Setting these after connecting to a param has no effect.
+        """
+        if self._param:
+            return
         self._paramPath = path
-        # Send signal with path and local param slot
-        QtGui.qApp.emit(QtCore.SIGNAL("paramGuiConnect"), self, path)
 
     def getParamPath(self):
+        """Get path of param.
+
+        Get the OSC path currently associated with the widget.
+        """
         return self._paramPath
+
+    def setParamMin(self, v):
+        """Set min value(s).
+
+        Set the min value(s) used to set up the connection with the param.
+        """
+        if self._length is 1:
+            self._paramMin[0] = v
+
+    def getParamMin(self):
+        """Set min value(s).
+
+        Sets the min value(s) used to set up the connection with the param.
+        After connecting, this has no effect.
+        """
+        if self._length == 1:
+            return self._paramMin[0]
+
+    def setParamMax(self, v):
+        """Set max value(s).
+
+        Set the max value(s) used to set up the connection with the param.
+        """
+        if self._length is 1:
+            self._paramMax[0] = v
+
+    def getParamMax(self):
+        """Set max value(s).
+
+        Sets the max value(s) used to set up the connection with the param.
+        After connecting, this has no effect.
+        """
+        if self._length == 1:
+            return self._paramMax[0]
+        else:
+            return tuple(self._paramMax)
+
+    def setParamDefault(self, v):
+        """Set default value(s).
+
+        Set the default value(s) used to set up the connection with the param.
+        """
+        if self._length is 1:
+            self._paramDefault[0] = v
+
+    def getParamDefault(self):
+        """Set default value(s).
+
+        Sets the default value(s) used to set up the connection with the param.
+        After connecting, this has no effect.
+        """
+        if self._length == 1:
+            return self._paramDefault[0]
+        else:
+            return tuple(self._paramDefault)
+    
 
 class ParamSpinBox(AbstractParamWidget, QtGui.QSpinBox):
 
@@ -261,8 +349,11 @@ class ParamSpinBox(AbstractParamWidget, QtGui.QSpinBox):
         QtGui.QSpinBox.__init__(self, *args)
 
         self._types = [int]
+        self._paramDefault = [t() for t in self._types]
 
         self.setAcceptDrops(1)
+
+        self._foo = "pripp"
         #self.setObjectName("paramSpinBox")
 
     def updateState(self):
@@ -275,9 +366,10 @@ class ParamSpinBox(AbstractParamWidget, QtGui.QSpinBox):
     def updateMax(self):
         self.setMaxValue(self._min[0])
 
+
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
-        qApp.emit(QtCore.SIGNAL("saveMe"), self._params)
+        qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
     def mousePressEvent(self, ev):
         if QtCore.Qt.ControlModifier & ev.modifiers() == QtCore.Qt.ControlModifier:
@@ -287,6 +379,19 @@ class ParamSpinBox(AbstractParamWidget, QtGui.QSpinBox):
         else:
             QtGui.QSpinBox.mousePressEvent(self, ev)
 
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramMin = QtCore.pyqtProperty("int", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("int", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("int", getParamDefault, setParamDefault)
         
 class ParamPushButton(AbstractParamWidget, QtGui.QPushButton):
     def __init__(self, *args):
@@ -294,6 +399,7 @@ class ParamPushButton(AbstractParamWidget, QtGui.QPushButton):
         QtGui.QPushButton.__init__(self, *args)
 
         self._types = [param.Bang]
+        self._paramDefault = [t() for t in self._types]
         self.setAcceptDrops(1)
         self.setContentsMargins(1,1,1,1)
 
@@ -309,14 +415,25 @@ class ParamPushButton(AbstractParamWidget, QtGui.QPushButton):
 
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
-        qApp.emit(QtCore.SIGNAL("saveMe"), self._params)
+        qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
                         
 class ParamToggleButton(ParamPushButton):
     def __init__(self, *args):
         ParamPushButton.__init__(self, *args)
 
         self._types = [bool]
+        self._paramDefault = [t() for t in self._types]
         self.setCheckable(1)
         self.color = QtGui.qApp.palette()
         self.green = QtGui.QPalette(QtCore.Qt.green)
@@ -338,12 +455,24 @@ class ParamToggleButton(ParamPushButton):
         else:
             self.setPalette(self.color)
 
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramDefault = QtCore.pyqtProperty("bool", getParamDefault, setParamDefault)
 
 class ParamThreeStateButton(ParamPushButton):
     def __init__(self, *args):
         ParamPushButton.__init__(self, *args)
 
         self._types = [int]
+        self._paramDefault = [t() for t in self._types]
 
         self._colors = (
                 QtGui.qApp.palette(),
@@ -365,11 +494,10 @@ class ParamThreeStateButton(ParamPushButton):
         if QtCore.Qt.ShiftModifier & ev.modifiers() == QtCore.Qt.ShiftModifier:
             self.toggleSelect()
             return
-        oldstate = self._params[0][0].getState()
         s = ev.button()
-        if s == 1 and oldstate is not 1:
+        if s == 1 and self._state[0] is not 1:
             ns = 1
-        elif s == 2 and self.state is not 2:
+        elif s == 2 and self._state[0] is not 2:
             ns = 2
         elif s in (1,2):
             ns = 0
@@ -378,12 +506,27 @@ class ParamThreeStateButton(ParamPushButton):
         self.setText(str(ns))
         self._param.setState(s)
 
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramMin = QtCore.pyqtProperty("int", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("int", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("int", getParamDefault, setParamDefault)
+
 class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
     def __init__(self, *args):
         AbstractParamWidget.__init__(self, *args)
         QtGui.QProgressBar.__init__(self, *args)
 
         self._types = [float]
+        self._paramDefault = [t() for t in self._types]
 
         self.accelerator = 0
         self.deltacount = 0
@@ -405,7 +548,7 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
         print "saveme"
-        qApp.emit(QtCore.SIGNAL("saveMe"), self._params)
+        qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
     def updateState(self):
         #this handles gui
@@ -415,7 +558,6 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
 
     def doDelta(self, d):
         if self.selected and self.sender() != self:
-            param = self._params[0][0]
             f = self._max[0] - self._min[0]
             self._state[0] += (d * f / 1000.0)
             self._param.update()
@@ -469,6 +611,20 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
         self.killTimer(self.deltaTimer)
         self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramMin = QtCore.pyqtProperty("double", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("double", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("double", getParamDefault, setParamDefault)
+
 class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
     def __init__(self, *args):
         
@@ -484,6 +640,7 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
         self.paramUpdateSignal = "valueChanged"
 
         self._types = [float, float]
+        self._paramDefault = [t() for t in self._types]
         self._btns = []
 
         self.setAcceptDrops(1)
@@ -528,11 +685,44 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
         self._btns.remove(ev.button())
     
     def value(self):
-        try:
-            f = self._params[0][0].getState(self._paramSlots[0]), self._params[1][0].getState(self._paramSlots[1])
-        except TypeError:
-            f = 0,0
-        return f
+        #FIXME: why have a value() ? 
+        return self._state[0][0]
+
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+
+    def setParamMin(self, v):
+        m = self._paramMin
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamMin(self):
+        m = self._paramMin
+        return QtCore.QPoint(m[0], m[1])
+
+    def setParamMax(self, v):
+        m = self._paramMax
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamMax(self):
+        m = self._paramMax
+        return QtCore.QPoint(m[0], m[1])
+
+    def setParamDefault(self, v):
+        m = self._paramDefault
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamDefault(self):
+        m = self._paramDefault
+        return QtCore.QPoint(m[0], m[1])
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramMin = QtCore.pyqtProperty("QPoint", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("QPoint", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("QPoint", getParamDefault, setParamDefault)
+
     
 class ParamGrid(AbstractParamWidget, QtGui.QFrame):
     def __init__(self, *args):
@@ -549,6 +739,7 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self.paramUpdateSignal = "valueChanged"
 
         self._types = [float, float]
+        self._paramDefault = [t() for t in self._types]
         self.resize(400,400)
         
         self.timer = None
@@ -621,11 +812,43 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self._param.update()
     
     def value(self):
-        try:
-            f = self._params[0][0].getState(self._paramSlots[0]), self._params[1][0].getState(self._paramSlots[1])
-        except TypeError:
-            f = 0,0
-        return f
+        #FIXME: why have a value() ? 
+        return self._state[0][0]
+
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+
+    def setParamMin(self, v):
+        m = self._paramMin
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamMin(self):
+        m = self._paramMin
+        return QtCore.QPoint(m[0], m[1])
+
+    def setParamMax(self, v):
+        m = self._paramMax
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamMax(self):
+        m = self._paramMax
+        return QtCore.QPoint(m[0], m[1])
+
+    def setParamDefault(self, v):
+        m = self._paramDefault
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getParamDefault(self):
+        m = self._paramDefault
+        return QtCore.QPoint(m[0], m[1])
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramMin = QtCore.pyqtProperty("QPoint", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("QPoint", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("QPoint", getParamDefault, setParamDefault)
 
 class ParamLineEdit(AbstractParamWidget, QtGui.QLineEdit):
     """ A simple line edit/dropbox """
@@ -634,6 +857,7 @@ class ParamLineEdit(AbstractParamWidget, QtGui.QLineEdit):
         QtGui.QLineEdit.__init__(self, *args)
 
         self._types = [str]
+        self._paramDefault = [t() for t in self._types]
         self.setAcceptDrops(1)
         #Some hackish renames
         self.setState = self.setText
@@ -651,13 +875,25 @@ class ParamLineEdit(AbstractParamWidget, QtGui.QLineEdit):
 
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
-        qApp.emit(QtCore.SIGNAL("saveMe"), self._params)
+        qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
     def dropEvent(self, ev):
         AbstractParamWidget.dropEvent(self, ev)
         self._state[0] = str(self.text())
         self._param.update()
         self.clearFocus()
+
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramDefault = QtCore.pyqtProperty("QString", getParamDefault, setParamDefault)
 
 class ParamLabel(AbstractParamWidget, QtGui.QLabel):
 
@@ -667,6 +903,7 @@ class ParamLabel(AbstractParamWidget, QtGui.QLabel):
         QtGui.QLabel.__init__(self, *args)
 
         self._types = [str]
+        self._paramDefault = [t() for t in self._types]
         self.setAcceptDrops(1)
         #Some hackish renames
         self.setState = self.setText
@@ -684,13 +921,25 @@ class ParamLabel(AbstractParamWidget, QtGui.QLabel):
 
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
-        qApp.emit(QtCore.SIGNAL("saveMe"), self._params)
+        qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
     def dropEvent(self, ev):
         AbstractParamWidget.dropEvent(self, ev)
         self._state[0] = str(self.text())
         self.emit(QtCore.SIGNAL("textChanged(const QString &)"), self.text())
         self._param.update()
+
+    setParamPath = AbstractParamWidget.setParamPath
+    getParamPath = AbstractParamWidget.getParamPath
+    setParamMin = AbstractParamWidget.setParamMin
+    getParamMin = AbstractParamWidget.getParamMin
+    setParamMax = AbstractParamWidget.setParamMax
+    getParamMax = AbstractParamWidget.getParamMax
+    setParamDefault = AbstractParamWidget.setParamDefault
+    getParamDefault = AbstractParamWidget.getParamDefault
+
+    paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
+    paramDefault = QtCore.pyqtProperty("QString", getParamDefault, setParamDefault)
 
 class ParamBox(QtGui.QFrame):
     """A Grouping box for Param widgets.
@@ -745,25 +994,7 @@ class ParamBox(QtGui.QFrame):
     def getParams(self):
         """Returns children Params."""
         return self._params
-        
-    params = QtCore.pyqtProperty("const QString &", getParams)
+    #FIXME: This should be a list. It's not even used. 
+    #params = QtCore.pyqtProperty("QString", getParams)
 
 
-if __name__ == '__main__':
-    import larmlib.param
-    a = QtGui.QApplication(sys.argv)
-    #p1 = param.ListParam("/path/to/param", [float, float], min=[0.0, 0.0], max=[10.0, 10.0])
-    #p1 = param.FloatParam("/path/to/param")
-    p1 = param.StringParam("/path/to/param")
-    win = QtGui.QWidget()
-    layout = QtGui.QBoxLayout(QtGui.QBoxLayout.RightToLeft, win)
-    ap = QtGui.QFrame(win)
-    layout.insertWidget(0, ap)
-    w = ParamLabel(win)
-    layout.addWidget(w)
-    w.setParamPath("/path/to/param")
-    p1.setState("fjojoj")
-    p1.printDebugInfo()
-
-    win.show()
-    sys.exit(a.exec_())

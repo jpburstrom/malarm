@@ -10,7 +10,7 @@ from soundfileviewer import *
 #============================================================================#
 # The group name in designer widgetbox                                       #
 #----------------------------------------------------------------------------#
-DESIGNER_GROUP_NAME = "Larm Widgets"
+DESIGNER_GROUP_NAME = "malarm misc widgets"
 
 #============================================================================#
 # Plugin for AbstractParamWidget                                             #

@@ -16,7 +16,7 @@ from larmwidgets.paramwidgets import AbstractParamWidget
 from persistance import SettingsHandler, PresetHandler
 from shortcuteditor import ShortcutEditor
 from globals import *
-from param import *
+from paramfactory import ParamFactory
 from qtosc import Emitter, OscHelper
 
 ProjectDialogUi, dummy = uic.loadUiType(os.path.join(os.path.dirname(__file__), "forms/projectdialog.ui"))
@@ -135,6 +135,7 @@ class ProjectContainer(QtCore.QObject):
         
         ###############
         #Run Designer signal
+        self.designer = None #QProcess in spe
         self.connect(self._mainwindow.actionEdit_Ui, QtCore.SIGNAL("activated()"), self.runDesigner)
 
         self.oscServer = OscHelper()
@@ -171,42 +172,49 @@ class ProjectContainer(QtCore.QObject):
             #return
 
 
-        children = self._container.findChildren(AbstractParamWidget)
+        children = self._container.findChildren(QtGui.QWidget)
+        factory = ParamFactory()
+        for v in children:
+            p = factory.createParam(v)
+            if p:
+                self.params[p.address] = p
+                self.oscServer.createSenderFromParam(p)
 
-        for p, v in self.parameditor.params.items():
-            u = copy.deepcopy(v)
-            v = zip(*v)
-            v = [[j for j in i] for i in v]
-            try:
-                t = [eval(t) for t in v[0]]
-            except IndexError, err:
-                print "Rebuild problem:", err
-                continue
-            mapping = { int : IntParam, float : FloatParam, str : StringParam, bool : BoolParam, Bang : BangParam }
-            if len(t) == 1:
-                t = t[0]
-                v[1] = v[1][0]
-                v[2] = v[2][0]
-                v[3] = v[3][0]
-                v[4] = v[4][0]
-                v[5] = v[5][0]
-                obj = mapping[t]
-                if t in (bool, Bang):
-                    self.params[p] = obj(p)
-                    self._createAction(p)
-                else:
-                    self.params[p] = obj(p, default=v[1], min=v[2], max=v[3])
-            else:
-                self.params[p] = ListParam(p, t, default=v[1], min=v[2], max=v[3])
-            print self.params
-            for slot, v in enumerate(u):
-                try:
-                    o = [i for i in children if str(i.objectName()) == v[4]][0]
-                except IndexError:
-                    pass
-                else:
-                    o.setParamPath(self.params[p].address)
-            self.oscServer.createSenderFromParam(self.params[p])
+
+#       for p, v in self.parameditor.params.items():
+#           u = copy.deepcopy(v)
+#           v = zip(*v)
+#           v = [[j for j in i] for i in v]
+#           try:
+#               t = [eval(t) for t in v[0]]
+#           except IndexError, err:
+#               print "Rebuild problem:", err
+#               continue
+#           mapping = { int : IntParam, float : FloatParam, str : StringParam, bool : BoolParam, Bang : BangParam }
+#           if len(t) == 1:
+#               t = t[0]
+#               v[1] = v[1][0]
+#               v[2] = v[2][0]
+#               v[3] = v[3][0]
+#               v[4] = v[4][0]
+#               v[5] = v[5][0]
+#               obj = mapping[t]
+#               if t in (bool, Bang):
+#                   self.params[p] = obj(p)
+#                   self._createAction(p)
+#               else:
+#                   self.params[p] = obj(p, default=v[1], min=v[2], max=v[3])
+#           else:
+#               self.params[p] = ListParam(p, t, default=v[1], min=v[2], max=v[3])
+#           print self.params
+#           for slot, v in enumerate(u):
+#               try:
+#                   o = [i for i in children if str(i.objectName()) == v[4]][0]
+#               except IndexError:
+#                   pass
+#               else:
+#                   o.setParamPath(self.params[p].address)
+#           self.oscServer.createSenderFromParam(self.params[p])
         
         #Send an init signal as last thing, 
         #so children can initialize what's needed
@@ -255,11 +263,19 @@ class ProjectContainer(QtCore.QObject):
     def runDesigner(self):
         """Run Qt designer.
         """
-        self.designer = QtCore.QProcess(self)
-        env = self.designer.systemEnvironment()
-        env.append("PYQTDESIGNERPATH=%s" % os.path.join(sys.path[0], "larmwidgets"))
-        self.designer.setEnvironment(env)
-        self.designer.start("/usr/bin/designer", [self._uifile])
+        if self.designer is None:
+            self.designer = QtCore.QProcess(self)
+            env = self.designer.systemEnvironment()
+            env.append("PYQTDESIGNERPATH=%s" % os.path.join(sys.path[0], "larmwidgets"))
+            env.append("PYTHONPATH=%s" % os.path.join(sys.path[0], "larmlib"))
+            self.designer.setEnvironment(env)
+            self.connect(self.designer, QtCore.SIGNAL("finished(int, QProcess::ExitStatus)"), self.onDesignerFinished)
+        if self.designer.state() == self.designer.NotRunning:
+            self.designer.start("/usr/bin/designer", [self._uifile])
+
+    def onDesignerFinished(self):
+        if QtGui.QMessageBox.question(self._mainwindow, "Rebuild?", "Yes! Want to rebuild UI?"):
+            self.rebuild()
 
     def initProjects(self):
 

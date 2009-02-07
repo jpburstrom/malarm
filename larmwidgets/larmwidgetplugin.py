@@ -12,7 +12,7 @@ from malarmtaskmenu import MalarmTaskMenuFactory
 #============================================================================#
 # The group name in designer widgetbox                                       #
 #----------------------------------------------------------------------------#
-DESIGNER_GROUP_NAME = "Larm Widgets"
+DESIGNER_GROUP_NAME = "malarm OSC widgets"
 
 #============================================================================#
 # Plugin for AbstractParamWidget                                             #
@@ -60,6 +60,50 @@ class ParamSpinBoxPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
 
     def createWidget(self, parent):
         return ParamSpinBox(parent)
+
+class ParamDoubleSpinBoxPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
+    def __init__(self, parent=None):
+        QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self, parent)
+        self.initialized = False
+
+    def initialize(self, formEditor):
+        if self.initialized:
+            return
+        manager = formEditor.extensionManager()
+        if manager:
+            self.factory = MalarmTaskMenuFactory(manager)
+            manager.registerExtensions(
+                self.factory, "com.trolltech.Qt.Designer.TaskMenu"
+                )
+
+        self.initialized = True
+
+    def isInitialized(self):
+        return self.initialized
+
+    def isContainer(self):
+        return False
+
+    def domXml(self):
+        return '<widget class="ParamDoubleSpinBox" name="paramDoubleSpinbox">\n</widget>\n'
+    
+    def group(self):
+        return DESIGNER_GROUP_NAME
+              
+    def includeFile(self):
+        return "paramwidgets"
+
+    def name(self):
+        return "ParamDoubleSpinBox"
+
+    def toolTip(self):
+        return ""
+
+    def whatsThis(self):
+        return ""
+
+    def createWidget(self, parent):
+        return ParamDoubleSpinBox(parent)
 
 class ParamPushButtonPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def __init__(self, parent=None):
@@ -135,6 +179,42 @@ class ParamToggleButtonPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
 
     def createWidget(self, parent):
         return ParamToggleButton(parent)
+
+class ParamCheckBoxPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
+    def __init__(self, parent=None):
+        QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self, parent)
+        self.initialized = False
+
+    def initialize(self, formEditor):
+        if self.initialized:
+            return
+
+    def isInitialized(self):
+        return self.initialized
+
+    def isContainer(self):
+        return False
+
+    def domXml(self):
+        return '<widget class="ParamCheckBox" name="paramTogglebutton">\n</widget>\n'
+    
+    def group(self):
+        return DESIGNER_GROUP_NAME
+              
+    def includeFile(self):
+        return "paramwidgets"
+
+    def name(self):
+        return "ParamCheckBox"
+
+    def toolTip(self):
+        return ""
+
+    def whatsThis(self):
+        return ""
+
+    def createWidget(self, parent):
+        return ParamCheckBox(parent)
 
 class ParamThreeStateButtonPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def __init__(self, parent=None):
@@ -244,6 +324,42 @@ class ParamGridPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def createWidget(self, parent):
         return ParamGrid(parent)
 
+class ParamMinMaxSliderPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
+    def __init__(self, parent=None):
+        QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self, parent)
+        self.initialized = False
+
+    def initialize(self, formEditor):
+        if self.initialized:
+            return
+
+    def isInitialized(self):
+        return self.initialized
+
+    def isContainer(self):
+        return False
+
+    def domXml(self):
+        return '<widget class="ParamMinMaxSlider" name="paramMinMaxSlider">\n</widget>\n'
+    
+    def group(self):
+        return DESIGNER_GROUP_NAME
+              
+    def includeFile(self):
+        return "paramwidgets"
+
+    def name(self):
+        return "ParamMinMaxSlider"
+
+    def toolTip(self):
+        return ""
+
+    def whatsThis(self):
+        return ""
+
+    def createWidget(self, parent):
+        return ParamMinMaxSlider(parent)
+
 class ParamLineEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def __init__(self, parent=None):
         QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self, parent)
@@ -316,39 +432,4 @@ class ParamLabelPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     def createWidget(self, parent):
         return ParamLabel(parent)
 
-class ParamBoxPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
-    def __init__(self, parent=None):
-        QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self, parent)
-        self.initialized = False
-
-    def initialize(self, formEditor):
-        if self.initialized:
-            return
-
-    def isInitialized(self):
-        return self.initialized
-
-    def isContainer(self):
-        return True
-
-    def domXml(self):
-        return '<widget class="ParamBox" name="parambox">\n</widget>\n'
-    
-    def group(self):
-        return DESIGNER_GROUP_NAME
-              
-    def includeFile(self):
-        return "paramwidgets"
-
-    def name(self):
-        return "ParamBox"
-
-    def toolTip(self):
-        return ""
-
-    def whatsThis(self):
-        return ""
-
-    def createWidget(self, parent):
-        return ParamBox(parent)
 

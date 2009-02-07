@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/johannes/.larm2/default/gui.ui'
 #
-# Created: Tue Jan 27 00:03:25 2009
+# Created: Sat Feb  7 19:39:51 2009
 #      by: PyQt4 UI code generator 4.4.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,8 +14,9 @@ class Ui_Form(object):
         Form.setObjectName("Form")
         Form.resize(762, 524)
         Form.setMinimumSize(QtCore.QSize(762, 524))
+        Form.setFocusPolicy(QtCore.Qt.TabFocus)
         self.paramProgress = ParamProgress(Form)
-        self.paramProgress.setGeometry(QtCore.QRect(0, 0, 21, 24))
+        self.paramProgress.setGeometry(QtCore.QRect(50, 120, 21, 24))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -24,7 +25,8 @@ class Ui_Form(object):
         self.paramProgress.setMinimumSize(QtCore.QSize(21, 0))
         self.paramProgress.setMaximumSize(QtCore.QSize(21, 16777215))
         self.paramProgress.setMaximum(1000)
-        self.paramProgress.setProperty("paramPath", QtCore.QVariant(QtGui.QApplication.translate("Form", "/default/path/tp", None, QtGui.QApplication.UnicodeUTF8)))
+        self.paramProgress.setParamMax(999999999.0)
+        self.paramProgress.setParamDefault(2e-05)
         self.paramProgress.setObjectName("paramProgress")
         self.frame = QtGui.QFrame(Form)
         self.frame.setGeometry(QtCore.QRect(90, 50, 334, 321))
@@ -43,12 +45,12 @@ class Ui_Form(object):
         self.pingpong.setObjectName("pingpong")
         self.gridLayout = QtGui.QGridLayout(self.pingpong)
         self.gridLayout.setObjectName("gridLayout")
-        self.soundfileViewer = SoundFileViewer(self.pingpong)
-        self.soundfileViewer.setObjectName("soundfileViewer")
-        self.gridLayout.addWidget(self.soundfileViewer, 1, 0, 1, 1)
         self.paramLabel = ParamLabel(self.pingpong)
         self.paramLabel.setObjectName("paramLabel")
         self.gridLayout.addWidget(self.paramLabel, 0, 0, 1, 1)
+        self.soundfileViewer = SoundFileViewer(self.pingpong)
+        self.soundfileViewer.setObjectName("soundfileViewer")
+        self.gridLayout.addWidget(self.soundfileViewer, 1, 0, 1, 1)
         self.verticalLayout.addWidget(self.pingpong)
         self.verticalLayout_2.addLayout(self.verticalLayout)
         self.paramGrid_2 = ParamGrid(Form)
@@ -65,6 +67,33 @@ class Ui_Form(object):
         self.paramSpinbox.setGeometry(QtCore.QRect(290, 390, 111, 21))
         self.paramSpinbox.setMaximum(999999999)
         self.paramSpinbox.setObjectName("paramSpinbox")
+        self.pushButton = QtGui.QPushButton(Form)
+        self.pushButton.setGeometry(QtCore.QRect(500, 60, 75, 26))
+        self.pushButton.setObjectName("pushButton")
+        self.paramPushbutton = ParamPushButton(Form)
+        self.paramPushbutton.setGeometry(QtCore.QRect(530, 100, 42, 26))
+        self.paramPushbutton.setObjectName("paramPushbutton")
+        self.paramThreeStatebutton = ParamThreeStateButton(Form)
+        self.paramThreeStatebutton.setGeometry(QtCore.QRect(600, 100, 42, 26))
+        self.paramThreeStatebutton.setParamMin(0)
+        self.paramThreeStatebutton.setParamMax(2)
+        self.paramThreeStatebutton.setParamDefault(0)
+        self.paramThreeStatebutton.setObjectName("paramThreeStatebutton")
+        self.paramTogglebutton = ParamToggleButton(Form)
+        self.paramTogglebutton.setGeometry(QtCore.QRect(660, 150, 42, 26))
+        self.paramTogglebutton.setObjectName("paramTogglebutton")
+        self.soundfileViewer_2 = SoundFileViewer(Form)
+        self.soundfileViewer_2.setGeometry(QtCore.QRect(30, 390, 100, 30))
+        self.soundfileViewer_2.setObjectName("soundfileViewer_2")
+        self.paramTogglebutton_2 = ParamCheckBox(Form)
+        self.paramTogglebutton_2.setGeometry(QtCore.QRect(120, 480, 24, 13))
+        self.paramTogglebutton_2.setObjectName("paramTogglebutton_2")
+        self.paramMinMaxSlider = ParamMinMaxSlider(Form)
+        self.paramMinMaxSlider.setGeometry(QtCore.QRect(190, 460, 121, 21))
+        self.paramMinMaxSlider.setParamMin(QtCore.QPoint(0, 0))
+        self.paramMinMaxSlider.setParamMax(QtCore.QPoint(1, 1))
+        self.paramMinMaxSlider.setParamDefault(QtCore.QPoint(0, 0))
+        self.paramMinMaxSlider.setObjectName("paramMinMaxSlider")
 
         self.retranslateUi(Form)
         QtCore.QObject.connect(self.pingpong, QtCore.SIGNAL("paramsCollected(PyQt_PyObject)"), self.paramBoxController_2.addParams)
@@ -75,9 +104,23 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramProgress.setParamPath(QtGui.QApplication.translate("Form", "/default/path/tp", None, QtGui.QApplication.UnicodeUTF8))
         self.paramBoxController_2.setGroupLabel(QtGui.QApplication.translate("Form", "KingKong", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramGrid_2.setParamPath(QtGui.QApplication.translate("Form", "/default/path/fook", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton.setText(QtGui.QApplication.translate("Form", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton.setShortcut(QtGui.QApplication.translate("Form", "Ctrl+C, S", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramPushbutton.setParamPath(QtGui.QApplication.translate("Form", "/default/tmp/pushbutton", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramThreeStatebutton.setZeroText(QtGui.QApplication.translate("Form", "Kuk", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramThreeStatebutton.setOneText(QtGui.QApplication.translate("Form", "Snopp", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramThreeStatebutton.setTwoText(QtGui.QApplication.translate("Form", "Penis", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramThreeStatebutton.setParamPath(QtGui.QApplication.translate("Form", "/default/tmp/threestate", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramTogglebutton.setParamPath(QtGui.QApplication.translate("Form", "/default/tmp/foo", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramTogglebutton.setOnText(QtGui.QApplication.translate("Form", "This is on.", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramTogglebutton.setOffText(QtGui.QApplication.translate("Form", "This is off.", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramTogglebutton_2.setParamPath(QtGui.QApplication.translate("Form", "/default/yes/yes", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramMinMaxSlider.setParamPath(QtGui.QApplication.translate("Form", "/default/tmp/yes/kings", None, QtGui.QApplication.UnicodeUTF8))
 
-from paramboxcontroller import ParamBoxController
+from paramboxcontroller import ParamBox, ParamBoxController
+from paramwidgets import ParamCheckBox, ParamMinMaxSlider, ParamSpinBox, ParamPushButton, ParamToggleButton, ParamProgress, ParamGrid, ParamThreeStateButton, ParamLabel
 from soundfileviewer import SoundFileViewer
-from paramwidgets import ParamBox, ParamSpinBox, ParamProgress, ParamGrid, ParamLabel
 from filebrowser import FileBrowserWidget

@@ -36,8 +36,12 @@ class Emitter(QtCore.QObject):
 
     def sendOsc(self, add, mess):
         """Osc sending method, easiest called with the qApp.OscSend signal."""
-        li = add.split("/")
-        recv = li.pop(1)
+        li = str(add).split("/")
+        try:
+            recv = li.pop(1)
+        except IndexError:
+            #FIXME: shouldn't be possible to send from no-address params
+            return
         add = "/".join(li)
 
         self._tobundle.append((recv, add, mess))
@@ -59,7 +63,10 @@ class Emitter(QtCore.QObject):
         r = self.helper.receivers
         while self._tobundle:
             recv, path, arg = self._tobundle.pop()
-            b.setdefault(recv, Bundle()).add(Message(path, *arg))
+            if arg is not None:
+                b.setdefault(recv, Bundle()).add(Message(path, *arg))
+            else:
+                b.setdefault(recv, Bundle()).add(Message(path))
             try:
                 [send(r[recv], bun) for recv, bun in b.items()]
             except KeyError:
@@ -148,7 +155,7 @@ class OscHelper(ServerThread):
                 self.incomingParamChange, (receiver, address)) #for incoming messages
 
     def createSenderFromParam(self, param):
-        a = param.address
+        a = str(param.address)
         a = a.split("/")
         receiver = a.pop(1)
         address = "/".join(a)

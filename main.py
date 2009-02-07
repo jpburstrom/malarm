@@ -3,9 +3,7 @@
 # Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
-#TODO: Create params from widget pyqtProperties. This is the only thing making sense.
-#TODO: ParamCHeckbox
-#TODO: make widgets usable without param connection (minmax+state)
+#TODO: action groups for edit actions -- disable on "performance mode"
 
 """A system for creating OSC sending (and receiving) guis.
 
@@ -70,7 +68,7 @@ class MainWindow(MainUI, QtGui.QMainWindow):
 
         self.projectContainer = ProjectContainer(self) #This is the hard working class, doing all the work
 
-        self.setPalette(QtGui.QPalette(QtCore.Qt.darkGray)) #Set some cosmetics.
+        QtGui.qApp.setPalette(QtGui.QPalette(QtCore.Qt.darkGray)) #Set some cosmetics.
 
         self.projectContainer.rebuild() #Refresh container
         

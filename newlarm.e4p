@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.2.dtd">
 <!-- eric4 project file for project newlarm -->
-<!-- Saved: 2009-01-10, 01:34:39 -->
+<!-- Saved: 2009-02-04, 22:32:48 -->
 <!-- Copyright (C) 2009 Johannes Burström, johannes@ljud.org -->
 <Project version="4.2">
   <ProgLanguage mixed="0">Python</ProgLanguage>
@@ -12,23 +12,124 @@
   <Email>johannes@ljud.org</Email>
   <Sources>
     <Source>
-      <Name>tabletest.py</Name>
+      <Name>main.py</Name>
     </Source>
     <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>__init__.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>paramboxcontrollerui.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>paramboxcontrollerslider.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>malarmtaskmenu.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>paramwidgets.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>filebrowserplugin.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>soundfileviewer.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>soundfileviewerplugin.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>paramboxcontroller.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>paramboxcontrollerplugin.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>larmwidgetplugin.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmwidgets</Dir>
+      <Name>filebrowser.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>__init__.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
       <Name>param.py</Name>
     </Source>
     <Source>
+      <Dir>larmlib</Dir>
+      <Name>projectcontainer.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>shortcuteditor.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>designer.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>parameditor.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
       <Name>qtosc.py</Name>
     </Source>
     <Source>
-      <Name>tabletestUI.py</Name>
+      <Dir>larmlib</Dir>
+      <Name>paramkeyboard.py</Name>
     </Source>
     <Source>
-      <Name>main.py</Name>
+      <Dir>larmlib</Dir>
+      <Name>persistance.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>keyhandler.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>globals.py</Name>
+    </Source>
+    <Source>
+      <Dir>larmlib</Dir>
+      <Name>mylineedit.py</Name>
     </Source>
   </Sources>
   <Forms>
     <Form>
+      <Dir>forms</Dir>
+      <Name>main.ui</Name>
+    </Form>
+    <Form>
+      <Dir>forms</Dir>
+      <Name>test.ui</Name>
+    </Form>
+    <Form>
+      <Dir>forms</Dir>
+      <Name>testform.ui</Name>
+    </Form>
+    <Form>
+      <Dir>forms</Dir>
+      <Name>test-widgetparamdialog.ui</Name>
+    </Form>
+    <Form>
+      <Dir>forms</Dir>
       <Name>tabletest.ui</Name>
     </Form>
   </Forms>
@@ -44,7 +145,117 @@
     <Name>main.py</Name>
   </MainScript>
   <Vcs>
-    <VcsType>None</VcsType>
+    <VcsType>Subversion</VcsType>
+    <VcsOptions>
+      <dict>
+        <key>
+          <string>add</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>checkout</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>commit</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>diff</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>export</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>global</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>history</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>log</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>remove</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>status</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>tag</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>update</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+      </dict>
+    </VcsOptions>
+    <VcsOtherData>
+      <dict>
+        <key>
+          <string>standardLayout</string>
+        </key>
+        <value>
+          <bool>True</bool>
+        </value>
+      </dict>
+    </VcsOtherData>
   </Vcs>
   <FiletypeAssociations>
     <FiletypeAssociation pattern="*.ui" type="FORMS" />

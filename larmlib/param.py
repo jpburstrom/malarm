@@ -4,6 +4,8 @@
 __version__ = "$Revision$"
 
 #TODO: update preset menu on sibling delete
+#FIXME: Param setState and setMinValue/setMaxValue diffar i hur de fungerar. setState tar single values för non-list params,
+#medan de andra tar single-value list (om inte index är not None).
 
 import sys
 from time import sleep
@@ -21,6 +23,7 @@ _tree = {}
 #from easysave import EasySave
 
 OSCDEBUG = 0
+
 
 class Bang(object):
     """Simple Bang object. """
@@ -112,12 +115,11 @@ class _Param(QtCore.QObject):
         self._connections_recv = set()
        # osc.bind(self.handle_incoming_osc, "/incoming" + self.full_address)
 
-    def __getattr__(self, name):
+    def getTypelist(self):
         #FIXME: Inte säker på om det här är sättet att göra det på...
-        if name is "typelist":
-            return self._typelist
-        else:
-            raise AttributeError
+        return self._typelist
+
+    typelist = property(getTypelist)
 
     def setLabel(self, label):
         self.label = label
@@ -315,10 +317,37 @@ class _Param(QtCore.QObject):
         except TypeError:
             pass
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+
+    def fixedType(self, t, index=None):
+        """Correct None values according to param type(s).
+        
+        Checking type(s) of incoming list or (value, index) so it 
+        matches self.typelist. None is converted to 0, False or empty string, depending
+        on type. In other cases, it asserts that the type is correct (which if it wasn't
+        probably would be an error)."""
+        if index is None:
+            y = copy.copy(t)
+            for i, x in enumerate(t):
+                y[i] = self.fixedType(x, i)
+            return y
+        elif t is not None:
+            assert self.typecheck(type(t), index)
+            return t
+        else:
+            return self.typelist[index]()
     
-    def typecheck(self, type, index=0):
-        """Compares types with param type."""
-        return self.type is type or self._typelist == type
+    def typecheck(self, t, index=None):
+        """Compares type(s) with param typelist.
+        
+        @param t list/type -- list of types or single type
+        @param index=None int -- index of incoming single value"""
+        #XXX: comparison breaks if t is list and index is None, or if t is type and index is not None.
+        #This is obviously the wrong way to call the method, but should it raise an error?
+        #Or is this even the wrong way to design the method? probably, yes.
+        if index is None:
+            return self._typelist == t
+        else:
+            return self._typelist[index] == t
 
     def copyFrom(self, o):
         if self.typecheck(o):
@@ -417,11 +446,11 @@ class ListParam(_Param):
             self.min = []
             for i, t in enumerate(self._typelist):
                 try:
-                    self.max.append(kwargs.get('max')[i] or t(1.0))
+                    self.max.append(kwargs.get('max', t(0.0))[i])
                 except IndexError:
                     self.max.append(t(1.0))
                 try:
-                    self.min.append(kwargs.get('min')[i] or t(0.0))
+                    self.min.append(kwargs.get('min', t(0.0))[i])
                 except IndexError:
                     self.min.append(t(0.0))
         else:
@@ -460,17 +489,16 @@ class ListParam(_Param):
             for i, va in enumerate(v):
                 self._state[i] = va
         else:
-            print self._state, index, v
             if self._state[index] is v:
                 return
             v = self.within(v, index)
             self._state[index] = v
-        print "foo"
         try:
             self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
             pass
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+
 
     def within(self, v, index=None):
         """Makes sure the state value is between boundaries, if applicable."""
@@ -496,28 +524,18 @@ class ListParam(_Param):
         current list.
         index -- int. 
         """
+        v = self.fixedType(v, index)
         if index:
-            assert self.typecheck(type(v), index)
             self.max[index] = v
-            return
-        try:
-            assert self.typecheck([type(val) for val in v], index)
-        except (AssertionError, TypeError), err:
-            traceback.print_exc()
             return
         self.max = copy.copy(v)
         self.emit(_SIGNAL("paramUpdate"), self.UpdateMax)
     
     def setMinValue(self, v, index = None):
         """Set min value, for list param."""
+        v = self.fixedType(v, index)
         if index:
-            assert self.typecheck(type(v), index)
             self.min[index] = v
-            return
-        try:
-            assert self.typecheck([type(val) for val in v], index)
-        except (AssertionError, TypeError), err:
-            traceback.print_exc()
             return
         self.min = copy.copy(v)
         self.emit(_SIGNAL("paramUpdate"), self.UpdateMin)
@@ -554,8 +572,8 @@ class NumParam(_Param):
         _Param.__init__(self, address, type, **kwargs)
 
         # Set min and max for numbers
-        self.max = [kwargs.get('max') or type(1.0)]
-        self.min = [kwargs.get('min') or type(0.0)]
+        self.max = [kwargs.get('max', type(1.0))]
+        self.min = [kwargs.get('min', type(0.0))]
 
         #Init
         self.setState(self._default)
@@ -566,6 +584,7 @@ class NumParam(_Param):
             return
         try:
             v = self.within(v)
+        #FIXME: bad error handling
         except ValueError:
             traceback.print_exc()
             return
@@ -584,21 +603,13 @@ class NumParam(_Param):
     
     def setMaxValue(self, v):
         """Set max value, for float and int and list params."""
-        try:
-            assert self.typecheck(type(v))
-        except (AssertionError, TypeError):
-            traceback.print_exc()
-            return
+        v = self.fixedType(v, 0)
         self.max[0] = v
         self.emit(_SIGNAL("paramUpdate"), self.UpdateMax)
     
     def setMinValue(self, v):
         """Set min value, for float and int and list params."""
-        try:
-            assert self.typecheck(type(v))
-        except (AssertionError, TypeError):
-            traceback.print_exc()
-            return
+        v = self.fixedType(v, 0)
         self.max[0] = v
         self.emit(_SIGNAL("paramUpdate"), self.UpdateMin)
         
@@ -662,10 +673,11 @@ class BoolParam(_Param):
             v = not self._state
         self._state = [bool(v)]
         try:
-            self.oscEmit(_SIGNAL("OscSend"), self.address, [int(self._state[0])])
+            self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
             pass
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+
 
 class BangParam(_Param):
     """
@@ -677,17 +689,23 @@ class BangParam(_Param):
 
         self._state = [Bang()]
 
-    def setState(self, v=None, echo=False):
+    def setState(self, v=None):
         """Sends a bang to OSC and gui.
         """
         
         try:
-            self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
+            self.oscEmit(_SIGNAL("OscSend"), self.address, None)
         except TypeError:
             pass
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
-        if echo:
-            qApp.emit(_SIGNAL("paramEcho"), self.address, self._state)
+        self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
+
+    def update(self):
+        """Send current state to ui and OSC."""
+        try:
+            self.oscEmit(_SIGNAL("OscSend"), self.address, None)
+        except TypeError:
+            pass
+        self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
     
     def __setitem__(self, k, v):
         self.setState()

@@ -3,7 +3,7 @@
 """
 """
 
-from PyQt4.QtCore import QString, QVariant, QPoint, SIGNAL, SLOT, pyqtSignature
+from PyQt4.QtCore import QString, QVariant, QPointF, SIGNAL, SLOT, pyqtSignature
 from PyQt4.QtDesigner import QExtensionFactory, QPyDesignerTaskMenuExtension, \
                              QDesignerFormWindowInterface
 from PyQt4.QtGui import QAction, QDialog, QDialogButtonBox, QGridLayout, \
@@ -81,10 +81,10 @@ class OscAddressDialog(QDialog):
         # We keep a reference to the widget in the form.
         self.widget = widget
         try:
-            self.type = type(widget.paramMin).__name__
+            self.type = type(widget.paramDefault).__name__
         except AttributeError:
             try:
-                self.type = type(widget.paramDefault).__name__
+                self.type = type(widget.paramMin).__name__
             except AttributeError:
                 self.type = "Bang"
         
@@ -134,13 +134,13 @@ class OscAddressDialog(QDialog):
                 formWindow.cursor().setProperty("paramDefault", QVariant(self.default[0].text()))
             elif self.type == "bool":
                 formWindow.cursor().setProperty("paramDefault", QVariant(self.default[0].isChecked()))
-            elif self.type == "QPoint":
+            elif self.type == "QPointF":
                 formWindow.cursor().setProperty("paramMin", QVariant(
-                    QPoint(self.min[0].value(), self.min[1].value())))
+                    QPointF(self.min[0].value(), self.min[1].value())))
                 formWindow.cursor().setProperty("paramMax", QVariant(
-                    QPoint(self.max[0].value(), self.max[1].value())))
+                    QPointF(self.max[0].value(), self.max[1].value())))
                 formWindow.cursor().setProperty("paramDefault", QVariant(
-                    QPoint(self.default[0].value(), self.default[1].value())))
+                    QPointF(self.default[0].value(), self.default[1].value())))
         self.accept()
 
     def setupAtoms(self):
@@ -170,7 +170,7 @@ class OscAddressDialog(QDialog):
             self.default[0].setText(self.widget.paramDefault)
         elif self.type == "bool":
             self.default[0].setChecked(self.widget.paramDefault)
-        elif self.type == "QPoint":
+        elif self.type == "QPointF":
             self.min[0].setValue(self.widget.paramMin.x())
             self.min[1].setValue(self.widget.paramMin.y())
             self.max[0].setValue(self.widget.paramMax.x())

@@ -3,7 +3,8 @@
 # Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
-#TODO: action groups for edit actions -- disable on "performance mode"
+#TODO: action groups for edit actions -- disable in "performance mode"
+#TODO: Update and add docs
 
 """A system for creating OSC sending (and receiving) guis.
 

@@ -270,7 +270,6 @@ class ParamCheckBox(QtGui.QCheckBox, AbstractParamWidget):
     paramDefault = QtCore.pyqtProperty("bool", getParamDefault, setParamDefault)
 
 class ParamThreeStateButton(ParamPushButton):
-    #TODO: TEST
     def __init__(self, *args):
         ParamPushButton.__init__(self, *args)
 
@@ -377,7 +376,6 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
         
         #We send a custom valueChanged signal, otherwise the updates 
         #from QProgressbar will destroy things...
-        self.paramUpdateSignal = "thisValueChanged"
         QtGui.QProgressBar.setRange(self, 0,1000)
 
         self.setAcceptDrops(1)
@@ -444,7 +442,6 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
         QtGui.QCursor.setPos(self.origo)
 
     def timerEvent(self, e):
-        print self.adder
         QtGui.qApp.emit( QtCore.SIGNAL("deltaChanged"), self, self.adder)
         self.accelerator = (self.accelerator + max(abs(self.deltacount), 0.0001)) / 2
         self.deltacount = 0
@@ -499,8 +496,6 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
         self.setFrameShape(self.StyledPanel)
         self.setFrameShadow(self.Sunken)
         self.setLineWidth(1)
-
-        self.paramUpdateSignal = "valueChanged"
 
         self._types = [float, float]
         self._paramDefault = [t() for t in self._types]
@@ -598,7 +593,7 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
 
     def getParamMin(self):
         m = self._paramMin
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     def setParamMax(self, v):
         m = self._paramMax
@@ -607,7 +602,7 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
 
     def getParamMax(self):
         m = self._paramMax
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     def setParamDefault(self, v):
         m = self._paramDefault
@@ -616,12 +611,12 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
 
     def getParamDefault(self):
         m = self._paramDefault
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
-    paramMin = QtCore.pyqtProperty("QPoint", getParamMin, setParamMin)
-    paramMax = QtCore.pyqtProperty("QPoint", getParamMax, setParamMax)
-    paramDefault = QtCore.pyqtProperty("QPoint", getParamDefault, setParamDefault)
+    paramMin = QtCore.pyqtProperty("QPointF", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("QPointF", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("QPointF", getParamDefault, setParamDefault)
 
     
 class ParamGrid(AbstractParamWidget, QtGui.QFrame):
@@ -640,8 +635,6 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self.setFrameShadow(self.Sunken)
         self.setLineWidth(4)
 
-        self.paramUpdateSignal = "valueChanged"
-
         self._types = [float, float]
         self._paramDefault = [t() for t in self._types]
         self.resize(400,400)
@@ -649,7 +642,7 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self.timer = None
         self.setAcceptDrops(1)
         
-        self.smooth = 1
+        self._smooth = 5
 
         self.updateMin = self.updateState
         self.updateMax = self.updateState
@@ -680,7 +673,8 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
             self.timer = self.startTimer(40)
         pos = ev.pos()
         self.mX = self._scaleFrom(((pos.x() / float(self.width()))), 0)
-        self.mY = self._scaleFrom(((pos.y() / float(self.height()))), 1)
+        h = float(self.height())
+        self.mY = self._scaleFrom((((h - pos.y()) / h)), 1)
     
     def mouseMoveEvent(self, ev):
         pos = ev.pos()
@@ -693,6 +687,7 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self.mX = self._scaleFrom(((pos.x() / float(self.width()))), 0)
         h = self.height()
         self.mY = self._scaleFrom((((h - pos.y())/ float(h))), 1)
+        self.update()
     
     def mouseDoubleClickEvent(self, ev):
         self._state[0], self._state[1] = self.mX, self.mY 
@@ -706,18 +701,14 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 
     def timerEvent(self, ev):
-        self._state[0] = min(self._max[0], max((self.mX + (self._state[0] * self.smooth)) / (
-                self.smooth + 1), self._min[0]))
-        self._state[1] = min(self._max[1], max((self.mY + (self._state[1] * self.smooth)) / (
-                self.smooth + 1), self._min[1]))
-        #self._state[1] = (self.mY + (self._state[1] * self.smooth)) / (
-        #        self.smooth + 1)
+        self._state[0] = min(self._max[0], max((self.mX + (self._state[0] * self._smooth)) / (
+                self._smooth + 1), self._min[0]))
+        self._state[1] = min(self._max[1], max((self.mY + (self._state[1] * self._smooth)) / (
+                self._smooth + 1), self._min[1]))
+        #self._state[1] = (self.mY + (self._state[1] * self._smooth)) / (
+        #        self._smooth + 1)
         self.update()
         self._param.update()
-    
-    def value(self):
-        #FIXME: why have a value() ? 
-        return self._state[0][0]
 
     setParamPath = AbstractParamWidget.setParamPath
     getParamPath = AbstractParamWidget.getParamPath
@@ -729,7 +720,7 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
 
     def getParamMin(self):
         m = self._paramMin
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     def setParamMax(self, v):
         m = self._paramMax
@@ -738,7 +729,7 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
 
     def getParamMax(self):
         m = self._paramMax
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     def setParamDefault(self, v):
         m = self._paramDefault
@@ -747,44 +738,68 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
 
     def getParamDefault(self):
         m = self._paramDefault
-        return QtCore.QPoint(m[0], m[1])
+        return QtCore.QPointF(m[0], m[1])
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
-    paramMin = QtCore.pyqtProperty("QPoint", getParamMin, setParamMin)
-    paramMax = QtCore.pyqtProperty("QPoint", getParamMax, setParamMax)
-    paramDefault = QtCore.pyqtProperty("QPoint", getParamDefault, setParamDefault)
+    paramMin = QtCore.pyqtProperty("QPointF", getParamMin, setParamMin)
+    paramMax = QtCore.pyqtProperty("QPointF", getParamMax, setParamMax)
+    paramDefault = QtCore.pyqtProperty("QPointF", getParamDefault, setParamDefault)
+    
+    
+    def getSmooth(self):
+        return self._smooth
+    
+    def setSmooth(self, v):
+        self._smooth = v
+
+    def defaultSmooth(self, v):
+        return 1.0
+
+    smooth = QtCore.pyqtProperty("double", getSmooth, setSmooth, defaultSmooth)
 
 class ParamLineEdit(AbstractParamWidget, QtGui.QLineEdit):
-    """ A simple line edit/dropbox """
+    """ A simple line edit/dropbox. """
     def __init__(self, *args):
+        """Constructor."""
         AbstractParamWidget.__init__(self, *args)
         QtGui.QLineEdit.__init__(self, *args)
 
         self._types = [str]
         self._paramDefault = [t() for t in self._types]
         self.setAcceptDrops(1)
-        #Some hackish renames
-        self.setState = self.setText
-        self.setValue = self.setText
-        self.value = self.text
+
+        self.connect(self, QtCore.SIGNAL("editingFinished()"), self.on_editingFinished)
 
     def updateState(self):
-        self.setText(self._state[0])
+        """Sync ui with current state."""
+        QtGui.QLineEdit.setText(self, self._state[0])
     
     def updateMin(self):
+        """Does nothing."""
         pass
 
     def updateMax(self):
+        """Does nothing."""
         pass
 
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
+        """Sends a request for being saved."""
         qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
-    def dropEvent(self, ev):
-        AbstractParamWidget.dropEvent(self, ev)
-        self._state[0] = str(self.text())
+    def setText(self, t):
+        """Sets param state, and calls for update."""
+        #self._state[0] = str(t)
         self._param.update()
+
+    def dropEvent(self, ev):
+        """Drop event handler."""
+        AbstractParamWidget.dropEvent(self, ev)
+        self.clearFocus()
+
+    @QtCore.pyqtSignature("")
+    def on_editingFinished(self):
+        self.setText(self.text())
         self.clearFocus()
 
     setParamPath = AbstractParamWidget.setParamPath
@@ -811,28 +826,27 @@ class ParamLabel(AbstractParamWidget, QtGui.QLabel):
         self._types = [str]
         self._paramDefault = [t() for t in self._types]
         self.setAcceptDrops(1)
-        #Some hackish renames
-        self.setState = self.setText
-        self.setValue = self.setText
-        self.value = self.text
 
     def updateState(self):
-        self.setText(self._state[0])
+        """Sync ui with current state."""
+        QtGui.QLabel.setText(self, self._state[0])
     
     def updateMin(self):
+        """Does nothing."""
         pass
 
     def updateMax(self):
+        """Does nothing."""
         pass
 
     @QtCore.pyqtSignature("saveParam()")
     def saveParam(self):
+        """Sends a request for being saved."""
         qApp.emit(QtCore.SIGNAL("saveMe"), self._param)
 
-    def dropEvent(self, ev):
-        AbstractParamWidget.dropEvent(self, ev)
-        self._state[0] = str(self.text())
-        self.emit(QtCore.SIGNAL("textChanged(const QString &)"), self.text())
+    def setText(self, text):
+        """Set param state, and call for update."""
+        self._state[0] = str(text)
         self._param.update()
 
     setParamPath = AbstractParamWidget.setParamPath

@@ -16,6 +16,7 @@ from larmwidgets.paramwidgets import AbstractParamWidget
 from persistance import SettingsHandler, PresetHandler
 from shortcuteditor import ShortcutEditor
 from globals import *
+from param import IntParam
 from paramfactory import ParamFactory
 from qtosc import Emitter, OscHelper
 

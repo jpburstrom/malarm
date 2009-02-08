@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/johannes/.larm2/default/gui.ui'
 #
-# Created: Sat Feb  7 19:39:51 2009
+# Created: Sun Feb  8 18:24:11 2009
 #      by: PyQt4 UI code generator 4.4.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,8 +25,9 @@ class Ui_Form(object):
         self.paramProgress.setMinimumSize(QtCore.QSize(21, 0))
         self.paramProgress.setMaximumSize(QtCore.QSize(21, 16777215))
         self.paramProgress.setMaximum(1000)
-        self.paramProgress.setParamMax(999999999.0)
-        self.paramProgress.setParamDefault(2e-05)
+        self.paramProgress.setParamMin(0.0)
+        self.paramProgress.setParamMax(99.99)
+        self.paramProgress.setParamDefault(7.0)
         self.paramProgress.setObjectName("paramProgress")
         self.frame = QtGui.QFrame(Form)
         self.frame.setGeometry(QtCore.QRect(90, 50, 334, 321))
@@ -55,6 +56,10 @@ class Ui_Form(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
         self.paramGrid_2 = ParamGrid(Form)
         self.paramGrid_2.setGeometry(QtCore.QRect(510, 150, 100, 100))
+        self.paramGrid_2.setParamMin(QtCore.QPointF(0.0, 0.0))
+        self.paramGrid_2.setParamMax(QtCore.QPointF(1.0, 1.0))
+        self.paramGrid_2.setParamDefault(QtCore.QPointF(0.0, 0.1))
+        self.paramGrid_2.setSmooth(20.0)
         self.paramGrid_2.setObjectName("paramGrid_2")
         self.fileBrowserWidget = FileBrowserWidget(Form)
         self.fileBrowserWidget.setGeometry(QtCore.QRect(480, 270, 256, 224))
@@ -77,10 +82,11 @@ class Ui_Form(object):
         self.paramThreeStatebutton.setGeometry(QtCore.QRect(600, 100, 42, 26))
         self.paramThreeStatebutton.setParamMin(0)
         self.paramThreeStatebutton.setParamMax(2)
-        self.paramThreeStatebutton.setParamDefault(0)
+        self.paramThreeStatebutton.setParamDefault(1)
         self.paramThreeStatebutton.setObjectName("paramThreeStatebutton")
         self.paramTogglebutton = ParamToggleButton(Form)
         self.paramTogglebutton.setGeometry(QtCore.QRect(660, 150, 42, 26))
+        self.paramTogglebutton.setParamDefault(True)
         self.paramTogglebutton.setObjectName("paramTogglebutton")
         self.soundfileViewer_2 = SoundFileViewer(Form)
         self.soundfileViewer_2.setGeometry(QtCore.QRect(30, 390, 100, 30))
@@ -90,22 +96,27 @@ class Ui_Form(object):
         self.paramTogglebutton_2.setObjectName("paramTogglebutton_2")
         self.paramMinMaxSlider = ParamMinMaxSlider(Form)
         self.paramMinMaxSlider.setGeometry(QtCore.QRect(190, 460, 121, 21))
-        self.paramMinMaxSlider.setParamMin(QtCore.QPoint(0, 0))
-        self.paramMinMaxSlider.setParamMax(QtCore.QPoint(1, 1))
-        self.paramMinMaxSlider.setParamDefault(QtCore.QPoint(0, 0))
+        self.paramMinMaxSlider.setParamMin(QtCore.QPointF(0.0, 0.0))
+        self.paramMinMaxSlider.setParamMax(QtCore.QPointF(1.0, 1.0))
+        self.paramMinMaxSlider.setParamDefault(QtCore.QPointF(0.0, 1.0))
         self.paramMinMaxSlider.setObjectName("paramMinMaxSlider")
+        self.paramLineedit = ParamLineEdit(Form)
+        self.paramLineedit.setGeometry(QtCore.QRect(490, 10, 127, 22))
+        self.paramLineedit.setObjectName("paramLineedit")
 
         self.retranslateUi(Form)
         QtCore.QObject.connect(self.pingpong, QtCore.SIGNAL("paramsCollected(PyQt_PyObject)"), self.paramBoxController_2.addParams)
         QtCore.QObject.connect(self.soundfileViewer, QtCore.SIGNAL("pointSelected(int)"), self.spinBox.setValue)
         QtCore.QObject.connect(self.soundfileViewer, QtCore.SIGNAL("pointSelected(int)"), self.paramSpinbox.setValue)
         QtCore.QObject.connect(self.paramLabel, QtCore.SIGNAL("textChanged(QString)"), self.soundfileViewer.setFilename)
+        QtCore.QObject.connect(self.soundfileViewer, QtCore.SIGNAL("soundFileDropped(QString)"), self.paramLabel.setText)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.paramProgress.setParamPath(QtGui.QApplication.translate("Form", "/default/path/tp", None, QtGui.QApplication.UnicodeUTF8))
         self.paramBoxController_2.setGroupLabel(QtGui.QApplication.translate("Form", "KingKong", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramLabel.setParamPath(QtGui.QApplication.translate("Form", "/default/foo/fim/fap", None, QtGui.QApplication.UnicodeUTF8))
         self.paramGrid_2.setParamPath(QtGui.QApplication.translate("Form", "/default/path/fook", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("Form", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setShortcut(QtGui.QApplication.translate("Form", "Ctrl+C, S", None, QtGui.QApplication.UnicodeUTF8))
@@ -119,8 +130,10 @@ class Ui_Form(object):
         self.paramTogglebutton.setOffText(QtGui.QApplication.translate("Form", "This is off.", None, QtGui.QApplication.UnicodeUTF8))
         self.paramTogglebutton_2.setParamPath(QtGui.QApplication.translate("Form", "/default/yes/yes", None, QtGui.QApplication.UnicodeUTF8))
         self.paramMinMaxSlider.setParamPath(QtGui.QApplication.translate("Form", "/default/tmp/yes/kings", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramLineedit.setParamPath(QtGui.QApplication.translate("Form", "/default/fim/fipp", None, QtGui.QApplication.UnicodeUTF8))
+        self.paramLineedit.setParamDefault(QtGui.QApplication.translate("Form", "rtwar", None, QtGui.QApplication.UnicodeUTF8))
 
 from paramboxcontroller import ParamBox, ParamBoxController
-from paramwidgets import ParamCheckBox, ParamMinMaxSlider, ParamSpinBox, ParamPushButton, ParamToggleButton, ParamProgress, ParamGrid, ParamThreeStateButton, ParamLabel
 from soundfileviewer import SoundFileViewer
+from paramwidgets import ParamLineEdit, ParamCheckBox, ParamMinMaxSlider, ParamSpinBox, ParamPushButton, ParamToggleButton, ParamProgress, ParamGrid, ParamThreeStateButton, ParamLabel
 from filebrowser import FileBrowserWidget

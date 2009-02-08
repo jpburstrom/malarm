@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2007 Johannes Burström, <johannes@ljud.org>
+# Copyright 2007-2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
 #TODO: update preset menu on sibling delete
@@ -116,7 +116,6 @@ class _Param(QtCore.QObject):
        # osc.bind(self.handle_incoming_osc, "/incoming" + self.full_address)
 
     def getTypelist(self):
-        #FIXME: Inte säker på om det här är sättet att göra det på...
         return self._typelist
 
     typelist = property(getTypelist)
@@ -127,12 +126,8 @@ class _Param(QtCore.QObject):
     def setDefault(self, kwargs):
         """Set init values.
         
-        Reimplemented in ListParam"""
-        default = kwargs.get('default', self.type())
-        if self.typecheck(type(default)):
-            self._default = [default]
-        else:
-            default = self.type()
+        Reimplemented in subclasses."""
+        raise NotImplementedError
         
     def __repr__(self):
             return '<%s (%s)>' % (self.address, str(self.getState()))
@@ -234,14 +229,9 @@ class _Param(QtCore.QObject):
         The value is internally represented as a list. For one item params, the value
         can be set either as a one item list or a single value according to the _Param type.
         If the param type is list, Changes value, sends to OSC and emits signals to eg gui, notifying
-       of the changes."""
-       
-        self._state = [v]
-        try:
-            self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
-        except TypeError:
-            pass
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+        of the changes."""
+        raise NotImplementedError
+        
 
     def update(self):
         """Send current state to ui and OSC."""
@@ -250,12 +240,6 @@ class _Param(QtCore.QObject):
         except TypeError:
             pass
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
-
-    def within(self, v):
-        """Returns the value between max and min boundaries, if applicable.
-
-        This is reimplemented in subclasses. This implementation just returns the value."""
-        return v
     
     def setMaxValue(self, v):
         """Set max value.
@@ -276,8 +260,7 @@ class _Param(QtCore.QObject):
         This makes it possible to pass the reference to the value to other methods.
         I don't know why you'd want to do that, but I probably had a reason once.
         This method extracts the value from the list and returns it."""
-        
-        return self._state[0]
+        raise NotImplementedError
 
     def saveSnapshot(self, key):
         """Set snapshot.
@@ -286,7 +269,7 @@ class _Param(QtCore.QObject):
         """
         if not self._saveable:
             return
-        self._snapshots[key] = self._state
+        self._snapshots[key] = copy.copy(self._state)
 
     def loadSnapshot(self, key):
         """Get snapshot.
@@ -295,8 +278,12 @@ class _Param(QtCore.QObject):
         """
         if not self._saveable:
             return
-        self._state = self._snapshots.get(key, self._state)
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+        try:
+            for i, v in self._snapshots.get(key, None):
+                self._state[i] = v
+        except TypeError:
+            pass
+        self.update()
 
     def interpolateSnapshot(self, a, b, factor):
         """Interpolate btwn 2 snapshot according to factor
@@ -308,15 +295,15 @@ class _Param(QtCore.QObject):
         Interpolates two snapshots like this:
         ((a * factor) + b * (1 - factor)) / 2
         """
-        a = self._snapshots.get(a)
-        b = self._snapshots.get(b)
-        self._state = [t(b[i] * factor) + (
-            a[i] * (1-factor)) for i, t in enumerate(self._typelist)]
-        try:
-            self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
-        except TypeError:
-            pass
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+        a = self._snapshots.get(a, None)
+        b = self._snapshots.get(b, None)
+        if None in (a, b):
+            return
+        for i, t in enumerate(self._typelist):
+            if t in (float, int):
+                self._state[i] = t(b[i] * factor) + (a[i] * (1-factor))
+        self.update()
+
 
     def fixedType(self, t, index=None):
         """Correct None values according to param type(s).
@@ -326,10 +313,9 @@ class _Param(QtCore.QObject):
         on type. In other cases, it asserts that the type is correct (which if it wasn't
         probably would be an error)."""
         if index is None:
-            y = copy.copy(t)
             for i, x in enumerate(t):
-                y[i] = self.fixedType(x, i)
-            return y
+                t[i] = self.fixedType(x, i)
+            return t
         elif t is not None:
             assert self.typecheck(type(t), index)
             return t
@@ -340,56 +326,56 @@ class _Param(QtCore.QObject):
         """Compares type(s) with param typelist.
         
         @param t list/type -- list of types or single type
-        @param index=None int -- index of incoming single value"""
-        #XXX: comparison breaks if t is list and index is None, or if t is type and index is not None.
-        #This is obviously the wrong way to call the method, but should it raise an error?
-        #Or is this even the wrong way to design the method? probably, yes.
-        if index is None:
-            return self._typelist == t
-        else:
-            return self._typelist[index] == t
+        @param index=None int -- index of incoming single value
+        
+        returns bool
+        
+        Implemented in subclasses."""
+        raise NotImplementedError
 
     def copyFrom(self, o):
-        if self.typecheck(o):
-            self._state[0] = self.within(o.state[0])
-        self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
+        """Copy value(s) from another param."""
+        if self.typecheck(o.typelist):
+            for i, v in o.getStateReference():
+                self._state[i] = self.within(v)
+            self.update()
         
-    def check_connection(self, o):
-        """Looking for feedback loops in param connections
-        
-        Before connecting this param to another, this method checks that the
-        other param isn't currently controlling this one, to avoid feedback 
-        control loops. Works recursively through the connection tree."""
-        
-        if self is o:
-            return False
-        clist = self._connections_recv #sic!
-        if o in clist:
-            return False
-        for connection in clist:
-            f = connection.check_connection(o)
-            if f is False:
-                return False
-        return True
+#   def check_connection(self, o):
+#       """Looking for feedback loops in param connections
+#       
+#       Before connecting this param to another, this method checks that the
+#       other param isn't currently controlling this one, to avoid feedback 
+#       control loops. Works recursively through the connection tree."""
+#       
+#       if self is o:
+#           return False
+#       clist = self._connections_recv #sic!
+#       if o in clist:
+#           return False
+#       for connection in clist:
+#           f = connection.check_connection(o)
+#           if f is False:
+#               return False
+#       return True
 
-    def add_connection(self, o):
-        """Adds a connection from this _Param to another one. 
-        
-        Returns True if connection was successful, otherwise False."""
-        
-        if (not self.check_connection(o)) or self is o:
-            return False
+#   def add_connection(self, o):
+#       """Adds a connection from this _Param to another one. 
+#       
+#       Returns True if connection was successful, otherwise False."""
+#       
+#       if (not self.check_connection(o)) or self is o:
+#           return False
 
-        self._connections_send.add(o)
-        o._connections_recv.add(self)
-        return True
-        
-    def remove_connection(self, o):
-        """Remove connection between self and another."""
-        
-        self._connections_send.discard(o)
-        o._connections_recv.discard(self)
-        return True
+#       self._connections_send.add(o)
+#       o._connections_recv.add(self)
+#       return True
+#       
+#   def remove_connection(self, o):
+#       """Remove connection between self and another."""
+#       
+#       self._connections_send.discard(o)
+#       o._connections_recv.discard(self)
+#       return True
     
     def handle_incoming_osc(self, path, tag, args):
         """Takes care of incoming osc messages.
@@ -397,16 +383,7 @@ class _Param(QtCore.QObject):
         Updates state, sends not to OSC (sic) and emits signals for GUI updates."""
         if path != self.address or tag != "setState":
             return
-        #OPTIMIZING
-        #try:
-        #    if self.type is not list:
-        #        v = [self.type(args[0])]
-        #    else:
-        #        v = [self._typelist[i](a) for i, a in enumerate(args)]
-        #except TypeError, err:
-        #    print "Problem with incoming osc:", err
-        v = args
-        self._state = self.within(v)
+        self._state[0] = self.within(args[0])
         self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
 
     def set_updates_enabled(self, updates):
@@ -468,9 +445,10 @@ class ListParam(_Param):
         """
         Set default init value.
         """
-        default = kwargs.get('default', [t() for t in self._typelist])
-        if not self.typecheck([type(v) for v in default]):
-            default = [t() for t in self._typelist]
+        default = list(kwargs.get('default', [t() for t in self._typelist]))
+        #Force correct types
+        for i, d in enumerate(default):
+            default[i] = self._typelist[i](d)
         self._default = default
 
     def __setitem__(self, k, v):
@@ -478,21 +456,16 @@ class ListParam(_Param):
 
     def setState(self, v,  index=None):
         """State setter, OSC sender and gui updater."""
-        if v == self._state:
-                return
-        if index is None:
-            try:
-                v = self.within(v)
-            except (TypeError, IndexError):
-                traceback.print_exc()
-                return
+        #Test if whole list, right types and not the same as current state
+        if index is None and self.typecheck(
+                [type(a) for a in v]) and not v == self._state:
             for i, va in enumerate(v):
                 self._state[i] = va
+        #Test if index is right type, and not the same as current
+        elif self.typecheck(type(v), index) and not self._state[index] == v:
+            self._state[index] = self.within(v, index)
         else:
-            if self._state[index] is v:
-                return
-            v = self.within(v, index)
-            self._state[index] = v
+            return
         try:
             self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
@@ -500,18 +473,9 @@ class ListParam(_Param):
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
 
 
-    def within(self, v, index=None):
-        """Makes sure the state value is between boundaries, if applicable."""
-        #FIXME: this doesn't work with numbers and other types mixed. The list gets truncated.
-        if index is None:
-            return [self._withinhelper(v[i], i, t) for i, t in enumerate(self._typelist)]
-        elif self._typelist[index] in (float, int):
-            return max(self.min[index], min(self.max[index], v))
-
-    def _withinhelper(self, v, i, t):
-        """Checking list items for type and boundaries"""
-        assert self.typecheck(type(v), i)
-        if t in (float, int):
+    def within(self, v, i):
+        """Clipping list items between boundaries."""
+        if self._typelist[i] in (float, int):
             return max(self.min[i], min(self.max[i], v))
         else:
             return v
@@ -547,21 +511,101 @@ class ListParam(_Param):
             return self._state[index]
         
     
-    def typecheck(self, type, index=None):
+    def typecheck(self, t, index=None):
         """Compares types with param type.
-        
-        Numbers (ints and floats) is looked upon as equal type. When setting state, the conversion
-        is done automatically.
+
+        @param t type/list -- list of types or (if index) single type
+        @param index int -- typelist index to compare
         """
         fi = (float, int)
         #If index, we just pick that one and check if both are numbers
         if index is not None:
-            return self._typelist[index] is type or (self._typelist[index] in fi and type in fi)
-        #If check the whole list, we check one after another and if any is mismatching, we ditch the
-        #whole thing...
-        return not False in [self.typecheck(v, i) for i, v in enumerate(type)]
+            return self._typelist[index] is t or (self._typelist[index] in fi and t in fi)
+        #If check the whole list, we check one after another and 
+        #if any is mismatching, return false...
+        for index, v in enumerate(t):
+            if self._typelist[index] is not v or not (
+                    self._typelist[index] in fi and v in fi):
+                return False
+        return True
 
-class NumParam(_Param):
+    def handle_incoming_osc(self, path, tag, args):
+        """Takes care of incoming osc messages.
+        
+        Updates state, sends not to OSC (sic) and emits signals for GUI updates."""
+        if path != self.address or tag != "setState":
+            return
+        for i, v in enumerate(args):
+            self._state[i] = v
+        self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
+
+class _SingleParam(_Param):
+    """
+    A subclass of _Param for single items.
+    """
+
+    def __init__(self, address, type, **kwargs):
+        _Param.__init__(self, address, type, **kwargs)
+
+    def setDefault(self, kwargs):
+        """Set init values.
+        """
+        default = kwargs.get('default', self.type())
+        self._default = [self.type(default)]
+
+    def getState(self,  index = None):
+        """Get current state.
+        
+        The state is internally represented as a one-item list. 
+        This makes it possible to pass the reference to the value to other methods.
+        I don't know why you'd want to do that, but I probably had a reason once.
+        This method extracts the value from the list and returns it."""
+        return self._state[0]
+
+    def saveSnapshot(self, key):
+        """Set snapshot.
+
+        @param key dict key
+        """
+        if not self._saveable:
+            return
+        self._snapshots[key] = self._state[0]
+
+    def loadSnapshot(self, key):
+        """Get snapshot.
+
+        @param key dict key
+        """
+        if not self._saveable:
+            return
+        n = self._snapshots.get(key, None)
+        if n is not None:
+            self.state[0] = n
+            self.update()
+
+    def copyFrom(self, o):
+        """Copy value(s) from another param."""
+        if self.typecheck(o.typelist[0], 0):
+            self.state[0] = o.getStateReference()[0]
+            self.update()
+
+    def typecheck(self, t, index=None):
+        """Compares type t with param type.
+
+        @param t -- type or list of type(s)
+        @param index -- index of type (ignored in _SingleParam subclasses)
+
+        This method is called before setting state, to make sure the types of incoming
+        data are correct.
+        Returns False if not matching, True if matching.
+        """
+        try:
+            t = t[0]
+        except TypeError:
+            pass
+        return self._typelist[0] is t
+
+class NumParam(_SingleParam):
     """
     A subclass of _Param for numbers.
     """
@@ -569,37 +613,24 @@ class NumParam(_Param):
     def __init__(self, address, type, **kwargs):
 
         assert type in (float, int)
-        _Param.__init__(self, address, type, **kwargs)
+        _SingleParam.__init__(self, address, type, **kwargs)
 
         # Set min and max for numbers
         self.max = [kwargs.get('max', type(1.0))]
         self.min = [kwargs.get('min', type(0.0))]
 
         #Init
-        self.setState(self._default)
+        self.setState(self._default[0])
     
     def setState(self, v, echo=False):
-        v = [v]
-        if v == self._state:
+        t = self.typecheck(type(v))
+        if v == self._state[0] or not t:
             return
-        try:
-            v = self.within(v)
-        #FIXME: bad error handling
-        except ValueError:
-            traceback.print_exc()
-            return
-        self._state = v
-        try:
-            self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
-        except TypeError:
-            pass
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
-        if echo:
-            qApp.emit(_SIGNAL("paramEcho"), self.address, v)
-
-    def within(self, v):
-        """Makes sure the state value is between boundaries, if applicable."""
-        return [self.type(max(self.min[0], min(self.max[0], v[0])))]
+        if t is 1:
+            self._state[0] = max(self.min[0], min(self.max[0], v))
+        else:
+            self._state[0] = self.type(max(self.min[0], min(self.max[0], v)))
+        self.update()
     
     def setMaxValue(self, v):
         """Set max value, for float and int and list params."""
@@ -614,13 +645,41 @@ class NumParam(_Param):
         self.emit(_SIGNAL("paramUpdate"), self.UpdateMin)
         
     def typecheck(self, ty, index=0):
-        """Compares types with param type."""
+        """Compares type t with param type.
+
+        This method is called before setting state, to make sure the types of incoming
+        data are correct.
+        Returns 0 if not matching, 1 if matching, and 2 if both are numbers, but not of
+        the same type (ie int and float).
+        """
         fi = (float, int)
         try:
             ty = ty[0]
         except TypeError:
             pass
-        return self.type in fi and ty in fi
+        if self.type is fi:
+            return 1
+        elif self.type in fi and ty in fi:
+            return 2
+        return 0
+
+    def interpolateSnapshot(self, a, b):
+        """Interpolate btwn 2 snapshot according to factor
+
+        @param a dict key: snapshot A
+        @param b dict key: snapshot B
+        @param factor float(0-1): interpolation factor
+
+        Interpolates two snapshots like this:
+        ((a * factor) + b * (1 - factor)) / 2
+        """
+        #In _SingleParam, snapshots are not lists, but single atoms
+        a = self._snapshots.get(a, None)
+        b = self._snapshots.get(b, None)
+        if None in (a, b):
+            return
+        self._state[0] = t(b * factor) + (a * (1-factor))
+        self.update()
     
 
 class FloatParam(NumParam):
@@ -637,15 +696,16 @@ class IntParam(NumParam):
     def __init__(self, address, **kwargs):
         NumParam.__init__(self, address, int, **kwargs)
 
-class StringParam(_Param):
+class StringParam(_SingleParam):
     """
     A subclass of _Param for strings.
     """
 
     def __init__(self, address, **kwargs):
-        _Param.__init__(self, address, str, **kwargs)
+        _SingleParam.__init__(self, address, str, **kwargs)
         #Init
-        self.setState(self._default)
+        
+        self.setState(self._default[0])
 
     def setState(self, v):
         #XXX Currently remixing all input to strings. bad?
@@ -654,24 +714,23 @@ class StringParam(_Param):
             self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
             pass
-        print "emitting"
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
         
-class BoolParam(_Param):
+class BoolParam(_SingleParam):
     """
     A subclass of _Param for bools.
     """
 
     def __init__(self, address, **kwargs):
-        _Param.__init__(self, address, bool, **kwargs)
+        _SingleParam.__init__(self, address, bool, **kwargs)
         #Init
-        self.setState(self._default)
+        self.setState(self._default[0])
 
     def setState(self, v=None):
         #If v is none, toggle state.
         if v is None:
-            v = not self._state
-        self._state = [bool(v)]
+            v = not self._state[0]
+        self._state[0] = bool(v)
         try:
             self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
@@ -679,13 +738,13 @@ class BoolParam(_Param):
         self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
 
 
-class BangParam(_Param):
+class BangParam(_SingleParam):
     """
     A subclass of _Param for Bang.
     """
 
     def __init__(self, address, **kwargs):
-        _Param.__init__(self, address, Bang, **kwargs)
+        _SingleParam.__init__(self, address, Bang, **kwargs)
 
         self._state = [Bang()]
 

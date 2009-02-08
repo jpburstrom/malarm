@@ -174,20 +174,19 @@ class OscHelper(ServerThread):
 
 
     def setDefault(self, path, args, type, src, data):
-        path = self._internalPaths.get((path, data[0]), None) or self.makeInternalPath(path, data[0])
+        path = self._internalPaths.get((path, data[0]), self.makeInternalPath(path, data[0]))
         QtGui.qApp.emit(QtCore.SIGNAL("OscReceive"), path, "setDefault", [(a, t) for a, t in zip(args, type)])
 
     def setMax(self, path, args, type, src, data):
-        path = self._internalPaths.get((path, data[0]), None) or self.makeInternalPath(path, data[0])
+        path = self._internalPaths.get((path, data[0]), self.makeInternalPath(path, data[0]))
         QtGui.qApp.emit(QtCore.SIGNAL("OscReceive"), path, "setMax", [(a, t) for a, t in zip(args, type)])
 
     def setMin(self, path,args, type, src, data):
-        path = self._internalPaths.get((path, data[0]), None) or self.makeInternalPath(path, data[0])
+        path = self._internalPaths.get((path, data[0]), self.makeInternalPath(path, data[0]))
         QtGui.qApp.emit(QtCore.SIGNAL("OscReceive"), path, "setMin", [(a, t) for a, t in zip(args, type)])
 
     def incomingParamChange(self, path, args, type, src, data):
-        print "inco"
-        path = self._internalPaths.get((path, data[0]), None) or self.makeInternalPath(path, data[0], 1)
+        path = self._internalPaths.get((path, data[0]), self.makeInternalPath(path, data[0], 1))
         QtGui.qApp.emit(QtCore.SIGNAL("OscReceive"), path, "setState", args)
     
     def makeInternalPath(self, path, receiver, slot=2):

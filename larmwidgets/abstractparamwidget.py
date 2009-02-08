@@ -43,8 +43,6 @@ class AbstractParamWidget(object):
         self._paramMax = [0 for i in range(self._length)]
 
         
-        self.paramUpdateSignal = "valueChanged(int)" #gets connected to Param setState method
-
         if len(self._types) == 1 and self._types[0] in (str, bool, param.Bang):
             self.setMin = self._setMinMaxDummy
             self.setMax = self._setMinMaxDummy
@@ -73,18 +71,10 @@ class AbstractParamWidget(object):
             self._param = param
             #FIXME: set min, max, default
             #self.updateParamConnections()
-            #Pass on our own values to param
-            if self._length == 1:
-                self._paramMin = self._paramMin[0]
-                self._paramMax = self._paramMax[0]
-            self._param.setMinValue(self._paramMin)
-            self._param.setMaxValue(self._paramMax)
             #And get them as references from param.
             self._min = self._param.getMinReference()
             self._max = self._param.getMaxReference()
             self._state = self._param.getStateReference()
-            for i, p in enumerate(self._paramDefault):
-                self._state[i] = p
             self.connect(param, QtCore.SIGNAL("paramUpdate"), self.guiUpdate)
             self._param.update()
             self.setEnabled(True)
@@ -92,7 +82,6 @@ class AbstractParamWidget(object):
             raise TypeError, "Widget=>Param connection didn't work."
 
     def removeParam(self, param):
-        param.disconnect(self, QtCore.SIGNAL(self.paramUpdateSignal))
         self._param = None
 
     def guiUpdate(self, i):
@@ -164,7 +153,10 @@ class AbstractParamWidget(object):
             text = ev.mimeData().urls()[0].toLocalFile()
         else:
             text = ev.mimeData().text()
-        self.setState(str(text))
+        try:
+            self.setText(str(text))
+        except AttributeError:
+            pass
         ev.acceptProposedAction()
 
     def _setMinMaxDummy(self, i, v):
@@ -257,7 +249,7 @@ class AbstractParamWidget(object):
         if self._length is 1:
             self._paramDefault[0] = v
         else:
-            raise NotImplementedError, "Cannot set multiple min values"
+            raise NotImplementedError, "Cannot set multiple default values"
 
     def getParamDefault(self):
         """Set default value(s).

@@ -110,7 +110,8 @@ class SoundFileViewer(QtGui.QWidget):
             "rangeSelected(PyQt_PyObject)", # 2-item tuple
             "pointSelected(int)",
             "keyReleased(const QKeyReleaseEvent &)",
-            "keyPressed(const QKeyPressEvent &)"
+            "keyPressed(const QKeyPressEvent &)",
+            "soundFileDropped(const QString &)"
             )
 
     def __init__(self, *args):
@@ -283,6 +284,7 @@ class SoundFileViewer(QtGui.QWidget):
         else:
             text = ev.mimeData().text()
         self.setFilename(text)
+        self.emit(Qt.SIGNAL("soundFileDropped(const QString &)"), text)
         ev.acceptProposedAction()
 
 def main(args):

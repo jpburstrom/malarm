@@ -580,13 +580,13 @@ class _SingleParam(_Param):
             return
         n = self._snapshots.get(key, None)
         if n is not None:
-            self.state[0] = n
+            self._state[0] = n
             self.update()
 
     def copyFrom(self, o):
         """Copy value(s) from another param."""
         if self.typecheck(o.typelist[0], 0):
-            self.state[0] = o.getStateReference()[0]
+            self._state[0] = o.getStateReference()[0]
             self.update()
 
     def typecheck(self, t, index=None):
@@ -663,7 +663,7 @@ class NumParam(_SingleParam):
             return 2
         return 0
 
-    def interpolateSnapshot(self, a, b):
+    def interpolateSnapshot(self, a, b, factor):
         """Interpolate btwn 2 snapshot according to factor
 
         @param a dict key: snapshot A
@@ -678,7 +678,7 @@ class NumParam(_SingleParam):
         b = self._snapshots.get(b, None)
         if None in (a, b):
             return
-        self._state[0] = t(b * factor) + (a * (1-factor))
+        self._state[0] = (b * factor) + (a * (1-factor))
         self.update()
     
 
@@ -728,6 +728,8 @@ class BoolParam(_SingleParam):
 
     def setState(self, v=None):
         #If v is none, toggle state.
+        if v is self._state[0]:
+            return
         if v is None:
             v = not self._state[0]
         self._state[0] = bool(v)
@@ -735,7 +737,7 @@ class BoolParam(_SingleParam):
             self.oscEmit(_SIGNAL("OscSend"), self.address, self._state)
         except TypeError:
             pass
-        self.emit(_SIGNAL("paramUpdate"), int(self.UpdateState))
+        self.emit(_SIGNAL("paramUpdate"), self.UpdateState)
 
 
 class BangParam(_SingleParam):

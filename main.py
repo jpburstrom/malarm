@@ -5,6 +5,8 @@ __version__ = "$Revision$"
 
 #TODO: action groups for edit actions -- disable in "performance mode"
 #TODO: Update and add docs
+#TODO: plugin system for paramboxcontroller
+#TODO: unify weird keyboard shorts and regular qt. Support for emacs-type shortcuts?
 
 """A system for creating OSC sending (and receiving) guis.
 

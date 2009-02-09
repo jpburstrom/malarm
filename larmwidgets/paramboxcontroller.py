@@ -57,12 +57,12 @@ class ParamBox(QtGui.QFrame):
         if self._params and not force:
             return
         p = []
-        for child in self.findChildren(AbstractParamWidget):
+        for child in self.findChildren(QtGui.QWidget):
             try:
-                p.extend(child.params)
+                p.append(child.param)
             except AttributeError:
                 pass
-        self._params = tuple([p[0] for p in p if p is not None])
+        self._params = p
 
     def getParams(self):
         """Returns children Params."""

@@ -61,6 +61,11 @@ class AbstractParamWidget(object):
         return self._types
 
     types = property(getTypes)
+    
+    def getParam(self):
+        return self._param
+
+    param = property(getParam)
 
     def setParam(self, param):
         """Sync the properties of the widget and the param.

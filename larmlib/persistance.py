@@ -67,13 +67,7 @@ class _AbstractSettings(QtCore.QObject):
         else:
             fi = open(f, 'r')
             config_string = fi.read()
-            try:
-                return eval(config_string)
-            except:
-                self._handleError("There's something wrong with the file. \
-                A backup is made, and a new file is created", sys.exc_info())
-                shutil.copy(f, f + "~")
-                return {}
+            return eval(config_string)
             f.close()
 
     def _writeFile(self):

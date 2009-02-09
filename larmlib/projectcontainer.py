@@ -16,7 +16,7 @@ from larmwidgets.paramwidgets import AbstractParamWidget
 from persistance import SettingsHandler, PresetHandler
 from shortcuteditor import ShortcutEditor
 from globals import *
-from param import IntParam
+from param import Bang, IntParam
 from paramfactory import ParamFactory
 from qtosc import Emitter, OscHelper
 
@@ -180,6 +180,8 @@ class ProjectContainer(QtCore.QObject):
             if p:
                 self.params[p.address] = p
                 self.oscServer.createSenderFromParam(p)
+                if p.type in (bool, Bang):
+                    self._createAction(p.address)
 
 
 #       for p, v in self.parameditor.params.items():
@@ -310,7 +312,7 @@ class ProjectContainer(QtCore.QObject):
         t = p.type
         a = QtGui.QAction(add, self._mainwindow)
         if t is bool:
-            a.isCheckable(1)
+            a.setCheckable(1)
         self.connect(a, QtCore.SIGNAL("triggered(bool)"), p.setState)
         a.setShortcut(self.shortcuts.setdefault(add, ""))
         self._actions.append(a)
@@ -328,10 +330,13 @@ class ProjectContainer(QtCore.QObject):
             [self.remapShortcuts(k, None, v) for k, v in self.shortcuts.getSettings().items()]
     
     def handleSpecialKey(self, ev):
+        """FIXME: param cache"""
         try:
-            [ListParam.findParamFromPath(p).setState(
-                ) for p in self._shortcutRemap.get(
-                        unicode(ev.key().text()), None)]
+            for p in self._shortcutRemap.get(unicode(ev.key().text())):
+                try:
+                    self.params.get(p).setState()
+                except AttributeError:
+                    pass
         except TypeError:
             pass
 

@@ -38,7 +38,7 @@ class ParamFactory(object):
         Returns None if object lacks the right attributes.
         """
         try:
-            p = obj.paramPath
+            p = str(obj.paramPath)
         except AttributeError:
             return None
         if not p:

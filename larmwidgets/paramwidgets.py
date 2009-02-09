@@ -4,6 +4,16 @@
 __version__ = "$Revision$"
 
 
+"""
+Widget->param setup
+===================
+
+mouse/keybd => widget event handler (updating state) => param.update => widget.updateState
+param.setState (from OSC or state saving) => widget.updateState
+
+"""
+
+
 import os
 import sys
 import copy
@@ -170,8 +180,6 @@ class ParamToggleButton(ParamPushButton):
         self._onText = ""
         self._textSet = False
         
-        self.connect(self, QtCore.SIGNAL("toggled(bool)"), self.on_toggle)
-
     def updateState(self):
         self.setChecked(self._state[0])
         if self._state[0]:
@@ -191,14 +199,10 @@ class ParamToggleButton(ParamPushButton):
     def updateMax(self):
         pass
 
-    def on_toggle(self, boo):
-        self._state[0] = boo
-        self._param.update()
-
     def mousePressEvent(self, ev):
         AbstractParamWidget.mousePressEvent(self, ev)
         self._state[0] = not self._state[0]
-        self.updateState()
+        self._param.update()
 
     setParamPath = AbstractParamWidget.setParamPath
     getParamPath = AbstractParamWidget.getParamPath
@@ -228,14 +232,12 @@ class ParamToggleButton(ParamPushButton):
 
 
 class ParamCheckBox(QtGui.QCheckBox, AbstractParamWidget):
-    #TODO: TEST
     def __init__(self, *args):
         AbstractParamWidget.__init__(self, *args)
         QtGui.QCheckBox.__init__(self, *args)
 
         self._types = [bool]
         self._paramDefault = [t() for t in self._types]
-        self.connect(self, QtCore.SIGNAL("toggled(bool)"), self.on_toggle)
 
         self.setEnabled(self._param is not None)
 
@@ -248,14 +250,10 @@ class ParamCheckBox(QtGui.QCheckBox, AbstractParamWidget):
     def updateMax(self):
         pass
 
-    def on_toggle(self, boo):
-        self._state[0] = boo
-        self._param.update()
-
     def mousePressEvent(self, ev):
         AbstractParamWidget.mousePressEvent(self, ev)
         self._state[0] = not self._state[0]
-        self.updateState()
+        self._param.update()
 
     setParamPath = AbstractParamWidget.setParamPath
     getParamPath = AbstractParamWidget.getParamPath

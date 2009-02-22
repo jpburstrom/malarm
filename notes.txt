@@ -1,26 +1,42 @@
 register:
-
 globalemit("registerSettingsKey"), self._settingsKey)
-
 Container.on_registerSettingsKey(self, key):
     self._settingsKeys.add(key)
 
 load:
-
 for k, v in Saving.getSettings():
     globalemit("loadSettings", k, v)
-
 AnyClass.on_loadSettings(k, v):
     if k = self._settingsKey:
         self.value = v
 
 save:
-
 globalemit("saveSettings", keyprefix, callback)
-
 AnyClass.on_saveSettings(keyprefix, callback):
     callback(keyprefix + self._settingsKey, self.value)
+
+=====================================================
+
+UI design
+
+* Fitt's law: Använd de fyra hörnen och sidorna på skärmen för snabb access.
+* Liknande tangentkombinationer för liknande saker: volym, 
         
+===================================0
+
+Specialkey => shortcutmap => Action
+
+ParamBox 
+    
+    Action 1
+    Action 2
+    Action 3
+    ...
+
+Action är global, beroende av musposition. Actions definieras i första instansen av ParamBox? Eller i en separat klass...
+
+Separat klass. StandardActions
+
 
 
 

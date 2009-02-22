@@ -34,7 +34,6 @@
     </property>
     <addaction name="actionChoose_project" />
     <addaction name="separator" />
-    <addaction name="actionEdit_params" />
     <addaction name="actionEdit_Ui" />
     <addaction name="actionEdit_Shortcuts" />
     <addaction name="actionEdit_Receivers" />

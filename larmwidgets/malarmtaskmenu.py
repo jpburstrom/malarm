@@ -3,13 +3,15 @@
 """
 """
 
-from PyQt4.QtCore import QString, QVariant, QPointF, SIGNAL, SLOT, pyqtSignature
+from PyQt4.QtCore import QString, QVariant, QPointF, QPoint, SIGNAL, SLOT, pyqtSignature
 from PyQt4.QtDesigner import QExtensionFactory, QPyDesignerTaskMenuExtension, \
                              QDesignerFormWindowInterface
 from PyQt4.QtGui import QAction, QDialog, QDialogButtonBox, QGridLayout, \
             QLineEdit, QPushButton, QDoubleSpinBox, QSpinBox, QLabel, QVBoxLayout, \
-            QFrame, QCheckBox
+            QFrame, QCheckBox, QComboBox
+
 from paramwidgets import *
+import larmlib.standardactions as standardactions
 
 
 class MalarmWidgetsMenuEntry(QPyDesignerTaskMenuExtension):
@@ -95,9 +97,9 @@ class OscAddressDialog(QDialog):
         self.default = [None for i in range(self.widget.length)]
         self.max = [None for i in range(self.widget.length)]
         self.min = [None for i in range(self.widget.length)]
+        self.standardActions = [None for i in range(self.widget.length)]
         self.setupAtoms()
         self.setValues()
-        
         
         buttonBox = QDialogButtonBox()
         okButton = buttonBox.addButton(buttonBox.Ok)
@@ -127,14 +129,19 @@ class OscAddressDialog(QDialog):
         if formWindow:
             formWindow.cursor().setProperty("paramPath", QVariant(self.address.text()))
             if self.widget.length is 1 and self.min[0] is not None:
+                formWindow.cursor().setProperty("standardAction", QVariant(self.standardActions[0].currentIndex() - 1))
                 formWindow.cursor().setProperty("paramMin", QVariant(self.min[0].value()))
                 formWindow.cursor().setProperty("paramMax", QVariant(self.max[0].value()))
                 formWindow.cursor().setProperty("paramDefault", QVariant(self.default[0].value()))
             elif self.type == "str":
+                formWindow.cursor().setProperty("standardAction", QVariant(self.standardActions[0].currentIndex() - 1))
                 formWindow.cursor().setProperty("paramDefault", QVariant(self.default[0].text()))
             elif self.type == "bool":
+                formWindow.cursor().setProperty("standardAction", QVariant(self.standardActions[0].currentIndex() - 1))
                 formWindow.cursor().setProperty("paramDefault", QVariant(self.default[0].isChecked()))
             elif self.type == "QPointF":
+                formWindow.cursor().setProperty("standardAction", QVariant(
+                    QPoint(self.standardActions[0].currentIndex() - 1, self.standardActions[1].currentIndex() - 1)))
                 formWindow.cursor().setProperty("paramMin", QVariant(
                     QPointF(self.min[0].value(), self.min[1].value())))
                 formWindow.cursor().setProperty("paramMax", QVariant(
@@ -160,16 +167,24 @@ class OscAddressDialog(QDialog):
             self.default[i] = QLineEdit(self)
         elif type is bool:
             self.default[i] = QCheckBox(self)
+        self.standardActions[i] = QComboBox()
+        self.standardActions[i].addItem("")
+        fi = (float, int)
+        self.standardActions[i].addItems([ac[0] for ac in standardactions.ACTIONS if ac[1] is type or (type in fi and ac[1] in fi)])
+
 
     def setValues(self):
         if self.widget.length is 1 and self.min[0] is not None:
             self.min[0].setValue(self.widget.paramMin)
             self.max[0].setValue(self.widget.paramMax)
             self.default[0].setValue(self.widget.paramDefault)
+            self.standardActions[0].setCurrentIndex(self.widget.standardAction)
         elif self.type == "QString":
             self.default[0].setText(self.widget.paramDefault)
+            self.standardActions[0].setCurrentIndex(self.widget.standardAction)
         elif self.type == "bool":
             self.default[0].setChecked(self.widget.paramDefault)
+            self.standardActions[0].setCurrentIndex(self.widget.standardAction)
         elif self.type == "QPointF":
             self.min[0].setValue(self.widget.paramMin.x())
             self.min[1].setValue(self.widget.paramMin.y())
@@ -177,6 +192,8 @@ class OscAddressDialog(QDialog):
             self.max[1].setValue(self.widget.paramMax.y())
             self.default[0].setValue(self.widget.paramDefault.x())
             self.default[1].setValue(self.widget.paramDefault.y())
+            self.standardActions[0].setCurrentIndex(self.widget.standardAction.x())
+            self.standardActions[1].setCurrentIndex(self.widget.standardAction.y())
 
 
     def setupAtomUi(self, box):
@@ -194,3 +211,5 @@ class OscAddressDialog(QDialog):
                 layout.addWidget(self.min[i], (i*2)+4, 0, 1, 1)
                 layout.addWidget(QLabel("Max value", self), (i*2)+3, 1, 1, 1)
                 layout.addWidget(self.max[i], (i*2)+4, 1, 1, 1)
+            layout.addWidget(QLabel("Standard Action", self), (i*2)+3, 3, 1, 1)
+            layout.addWidget(self.standardActions[i], (i*2)+4, 3, 1, 1)

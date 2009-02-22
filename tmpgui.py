@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/johannes/.larm2/default/gui.ui'
 #
-# Created: Sun Feb  8 22:17:42 2009
+# Created: Sun Feb 22 22:52:35 2009
 #      by: PyQt4 UI code generator 4.4.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,6 +128,7 @@ class Ui_Form(object):
         self.paramProgress_11.setMinimumSize(QtCore.QSize(21, 24))
         self.paramProgress_11.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.paramProgress_11.setMaximum(1000)
+        self.paramProgress_11.setStandardAction(0)
         self.paramProgress_11.setParamMin(0.0)
         self.paramProgress_11.setParamMax(99.99)
         self.paramProgress_11.setParamDefault(7.0)

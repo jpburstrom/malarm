@@ -15,6 +15,7 @@ from parameditor import ParamEditor
 from larmwidgets.paramwidgets import AbstractParamWidget
 from persistance import SettingsHandler, PresetHandler
 from shortcuteditor import ShortcutEditor
+from standardactions import StandardActions
 from globals import *
 from param import Bang, IntParam
 from paramfactory import ParamFactory
@@ -75,7 +76,7 @@ class ProjectContainer(QtCore.QObject):
     def __init__(self, mainwindow, *args):
         QtCore.QObject.__init__(self, *args)
 
-        self.params = {}
+        self._params = {}
         self._mainwindow = mainwindow
         self._actions = []
 
@@ -107,6 +108,8 @@ class ProjectContainer(QtCore.QObject):
             "activated()"), self.showShortcutEditor)
         self._shortcutRemap = {}
         self.connect(self.shortcuts, QtCore.SIGNAL("settingsEdited"), self.remapShortcuts)
+
+        self.standardActions = StandardActions(self._mainwindow)
         
 
         ###############
@@ -129,10 +132,10 @@ class ProjectContainer(QtCore.QObject):
 
         ###############
         #Param Editor
-        self.parameditor = ParamEditor(self._mainwindow)
-        self.connect(self._mainwindow.actionEdit_params, QtCore.SIGNAL("activated()"), 
-                self.parameditor, QtCore.SLOT("show()"))
-        self.connect(self._mainwindow.action_Rebuild, QtCore.SIGNAL("activated()"), self.rebuild)
+        #self.parameditor = ParamEditor(self._mainwindow)
+        #self.connect(self._mainwindow.actionEdit_params, QtCore.SIGNAL("activated()"), 
+        #        self.parameditor, QtCore.SLOT("show()"))
+        #self.connect(self._mainwindow.action_Rebuild, QtCore.SIGNAL("activated()"), self.rebuild)
         
         ###############
         #Run Designer signal
@@ -145,7 +148,7 @@ class ProjectContainer(QtCore.QObject):
         self.initProjects()
 
     def rebuild(self):
-        """Rebuild the current project UI
+        """Rebuild the current project UI.
         """
         
         self.closeProject()
@@ -155,6 +158,7 @@ class ProjectContainer(QtCore.QObject):
         self._mainwindow.setCentralWidget(self._container)
         if os.path.exists(self._uifile):
             #XXX sys.path[0]???
+            #FIXME: save tmpgui to project dir and append that to sys.path
             #try:
             fi = open(os.path.join(sys.path[0], "tmpgui.py"),  "w")
             uic.compileUi(self._uifile, fi)
@@ -178,8 +182,8 @@ class ProjectContainer(QtCore.QObject):
         for v in children:
             p = factory.createParam(v)
             if p:
-                self.params[p.address] = p
-                self.oscServer.createSenderFromParam(p)
+                self._params[p.address] = p
+                self.oscServer.registerAddressFromParam(p)
                 if p.type in (bool, Bang):
                     self._createAction(p.address)
 
@@ -227,12 +231,14 @@ class ProjectContainer(QtCore.QObject):
         self.loadSettings()
 
     def closeProject(self):
+        """Close current project, and disconnect Qt Signals."""
+
         QtGui.qApp.emit(QtCore.SIGNAL("saveSettings"), self._currentProject, self._settings.update)
 
-        for k, p in self.params.items():
+        for k, p in self._params.items():
             self.disconnect(QtGui.qApp, QtCore.SIGNAL("paramGuiConnect"), p.paramGuiConnect)
             self.disconnect(QtGui.qApp, QtCore.SIGNAL("OscReceive"), p.handle_incoming_osc)
-        self.params.clear()
+        self._params.clear()
 
         if hasattr(self, "_container"):
             self._container.setParent(None)
@@ -240,13 +246,15 @@ class ProjectContainer(QtCore.QObject):
         QtGui.qApp.emit(QtCore.SIGNAL("closeProject"))
 
     def projectDialogAccepted(self):
-        """Called when changed project from project dialog."""
+        """Choose project upon accepted project dialog."""
         self.closeProject()
         self._currentProject = str(self.projectDialog.comboBox.currentText())
         self.initProjects()
         self.rebuild()
 
     def editReceivers(self):
+        """Edit current set of OSC receivers.
+        """
         r = ReceiverDialog(self._oscReceivers)
         if not r.exec_():
             return
@@ -259,6 +267,7 @@ class ProjectContainer(QtCore.QObject):
 
 
     def updateProjectList(self, s):
+        
         if str(s) not in self._projects and self.projectDialog.isShown():
             self._projects.append(str(s))
             self._settings.update("projects", self._projects)
@@ -286,8 +295,8 @@ class ProjectContainer(QtCore.QObject):
         self.projectPath = os.path.join(RCDIR, self._currentProject)
         if not os.path.exists(self.projectPath):
             os.mkdir(self.projectPath)
-        self.parameditor.setFilename(os.path.join(self.projectPath, "params.py"))
-        self.parameditor.openParams()
+        #self.parameditor.setFilename(os.path.join(self.projectPath, "params.py"))
+        #self.parameditor.openParams()
         self._settings.update("currentProject", self._currentProject)
 
         self._localSettingsList = set()
@@ -300,6 +309,7 @@ class ProjectContainer(QtCore.QObject):
         self._uifile = os.path.join(self.projectPath, "gui.ui")
         self.presets.setPath(os.path.join(self.projectPath, "presets.py"))
         self.shortcuts.setPath(os.path.join(self.projectPath, "shortcuts.py"))
+        [a.setShortcut(self.shortcuts.setdefault(label, "")) for label, a in self.standardActions.actions.items()]
         self.remapShortcuts()
 
     def loadPreset(self, preset):
@@ -308,7 +318,7 @@ class ProjectContainer(QtCore.QObject):
             IntParam.findParamFromPath(k), v) for k, v in preset.items()] if p is not None]
 
     def _createAction(self, add):
-        p = self.params[add]
+        p = self._params[add]
         t = p.type
         a = QtGui.QAction(add, self._mainwindow)
         if t is bool:
@@ -330,12 +340,12 @@ class ProjectContainer(QtCore.QObject):
             [self.remapShortcuts(k, None, v) for k, v in self.shortcuts.getSettings().items()]
     
     def handleSpecialKey(self, ev):
-        """FIXME: param cache"""
         try:
             for p in self._shortcutRemap.get(unicode(ev.key().text())):
                 try:
-                    self.params.get(p).setState()
+                    self._params.get(p).setState()
                 except AttributeError:
+                    QtGui.qApp.emit(QtCore.SIGNAL("standardParamActivated"), p)
                     pass
         except TypeError:
             pass

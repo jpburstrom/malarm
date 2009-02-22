@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2007 Johannes Burström, <johannes@ljud.org>
+# Copyright 2009 Johannes Burström, <johannes@ljud.org>
 __version__ = "$Revision$"
 
 
@@ -18,7 +18,7 @@ class SpecialKey(QtCore.QObject):
 
         self._key = frozenset(key)
         self._length = length
-        self._lengthLabel = ["S", "L", "D"]
+        self._lengthLabel = ["S", "L", "D", "R"]
 
     def length(self):
         return self._length
@@ -138,8 +138,12 @@ class KeyHandler(QtCore.QObject):
             else:
                 #Send Single click event
                 QtGui.qApp.sendEvent(self.parent(), SpecialKeyEvent(k))
-        #start timer, to check for doublecklick
-        self._doubletimers[self.startTimer(200)] = k
+                #start timer, to check for doublecklick
+                self._doubletimers[self.startTimer(200)] = k
+            self._pressed.discard(ev.key())
+            return True
+        #Otherwise send long release
+        QtGui.qApp.sendEvent(self.parent(), SpecialKeyEvent(k, 3))
         self._pressed.discard(ev.key())
         return True
 

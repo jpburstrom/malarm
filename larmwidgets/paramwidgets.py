@@ -68,7 +68,10 @@ class ParamSpinBox(AbstractParamWidget, QtGui.QSpinBox):
     getParamDefault = AbstractParamWidget.getParamDefault
     setParamPath = AbstractParamWidget.setParamPath
     getParamPath = AbstractParamWidget.getParamPath
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
 
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("int", getParamMin, setParamMin)
     paramMax = QtCore.pyqtProperty("int", getParamMax, setParamMax)
@@ -118,7 +121,10 @@ class ParamDoubleSpinBox(AbstractParamWidget, QtGui.QDoubleSpinBox):
     getParamDefault = AbstractParamWidget.getParamDefault
     setParamPath = AbstractParamWidget.setParamPath
     getParamPath = AbstractParamWidget.getParamPath
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
 
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("double", getParamMin, setParamMin)
     paramMax = QtCore.pyqtProperty("double", getParamMax, setParamMax)
@@ -160,7 +166,10 @@ class ParamPushButton(AbstractParamWidget, QtGui.QPushButton):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
 
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
                         
 class ParamToggleButton(ParamPushButton):
@@ -212,6 +221,10 @@ class ParamToggleButton(ParamPushButton):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramDefault = QtCore.pyqtProperty("bool", getParamDefault, setParamDefault)
@@ -263,6 +276,10 @@ class ParamCheckBox(QtGui.QCheckBox, AbstractParamWidget):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramDefault = QtCore.pyqtProperty("bool", getParamDefault, setParamDefault)
@@ -350,6 +367,10 @@ class ParamThreeStateButton(ParamPushButton):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("int", getParamMin, setParamMin)
@@ -475,6 +496,10 @@ class ParamProgress(AbstractParamWidget, QtGui.QProgressBar):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("double", getParamMin, setParamMin)
@@ -611,6 +636,17 @@ class ParamMinMaxSlider(AbstractParamWidget, QtGui.QFrame):
         m = self._paramDefault
         return QtCore.QPointF(m[0], m[1])
 
+    def setStandardAction(self, v):
+        m = self._standardAction
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getStandardAction(self):
+        m = self._standardAction
+        return QtCore.QPoint(m[0], m[1])
+
+    standardAction = QtCore.pyqtProperty("QPoint", getStandardAction, setStandardAction)
+
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("QPointF", getParamMin, setParamMin)
     paramMax = QtCore.pyqtProperty("QPointF", getParamMax, setParamMax)
@@ -738,6 +774,16 @@ class ParamGrid(AbstractParamWidget, QtGui.QFrame):
         m = self._paramDefault
         return QtCore.QPointF(m[0], m[1])
 
+    def setStandardAction(self, v):
+        m = self._standardAction
+        m[0] = v.x()
+        m[1] = v.y()
+
+    def getStandardAction(self):
+        m = self._standardAction
+        return QtCore.QPoint(m[0], m[1])
+
+    standardAction = QtCore.pyqtProperty("QPoint", getStandardAction, setStandardAction)
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramMin = QtCore.pyqtProperty("QPointF", getParamMin, setParamMin)
     paramMax = QtCore.pyqtProperty("QPointF", getParamMax, setParamMax)
@@ -808,6 +854,10 @@ class ParamLineEdit(AbstractParamWidget, QtGui.QLineEdit):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramDefault = QtCore.pyqtProperty("QString", getParamDefault, setParamDefault)
@@ -855,9 +905,52 @@ class ParamLabel(AbstractParamWidget, QtGui.QLabel):
     getParamMax = AbstractParamWidget.getParamMax
     setParamDefault = AbstractParamWidget.setParamDefault
     getParamDefault = AbstractParamWidget.getParamDefault
+    getStandardAction = AbstractParamWidget.getStandardAction
+    setStandardAction = AbstractParamWidget.setStandardAction
+
+    standardAction = QtCore.pyqtProperty("int", getStandardAction, setStandardAction)
 
     paramPath = QtCore.pyqtProperty("QString", getParamPath, setParamPath)
     paramDefault = QtCore.pyqtProperty("QString", getParamDefault, setParamDefault)
 
+class StandardActionButton(AbstractParamWidget, QtGui.QPushButton):
+    def __init__(self, action, *args):
+        AbstractParamWidget.__init__(self, *args)
+        QtGui.QPushButton.__init__(self, *args)
+        self._types = [action[2]]
+        self.setParam(action[0])
 
+        self.deltacount = 0
+        cursor = QtGui.QCursor
+        pos = self.mapFromGlobal(cursor().pos())
+        self.move(pos.x() - (self.width()/2), pos.y() - (self.height() / 2))
+        self._origo = cursor().pos()
+        self._offset = self.mapFromGlobal(self._origo).y()
+        self.setMouseTracking(1)
+        self.setPalette(QtGui.QPalette(QtCore.Qt.white))
+        self.font().setBold(1)
+        self.show()
+        
+        self.grabMouse()
+        self.setCursor(cursor(QtCore.Qt.BlankCursor))
 
+    def updateState(self):
+        pass
+
+    def mousePressEvent(self, ev):
+        QtGui.QPushButton.mousePressEvent(self, ev)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.releaseMouse()
+        self.deleteLater()
+
+    def mouseMoveEvent(self, e):
+        """Move slider up/down with mouse movement"""
+        if e.pos().y() == self._offset:
+            return
+        adder = (self._offset - e.y())
+        self.deltacount += adder
+        adder *= (abs(adder) * 0.01)
+        f = self._max[0] - self._min[0]
+        self._state[0] = min(self._max[0], max(self._min[0], self._state[0] + (adder * f / 1000.0)))
+        self._param.update()
+        QtGui.QCursor.setPos(self._origo)

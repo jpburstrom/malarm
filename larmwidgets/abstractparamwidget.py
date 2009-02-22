@@ -33,6 +33,7 @@ class AbstractParamWidget(object):
         self._min = [0 for i in range(self._length)]
         self._max = [1 for i in range(self._length)]
         self._state = [0 for i in range(self._length)]
+        self._standardAction = [-1 for i in range(self._length)]
         
         
         self._paramPath = ""
@@ -267,8 +268,29 @@ class AbstractParamWidget(object):
         else:
             return tuple(self._paramDefault)
 
+    def setStandardAction(self, v):
+        """Set standard action.
+        """
+        if self._length is 1:
+            self._standardAction[0] = v
+        else:
+            raise NotImplementedError, "Cannot set multiple default values"
+
+    def getStandardAction(self):
+        pass
+
+    def getStandardAction(self):
+        """Set standard action.
+        """
+        if self._length == 1:
+            return self._standardAction[0]
+        else:
+            return tuple(self._standardAction)
+
     #These are later on overridden by pyqtProperties, if needed.
     paramMin = property(getParamMin, setParamMin)
     paramMax = property(getParamMax, setParamMax)
     paramDefault = property(getParamDefault, setParamDefault)
+    standardAction = property(getStandardAction, setStandardAction)
+    
     

@@ -21,7 +21,7 @@ class _ShortcutButton(QtGui.QLineEdit):
         self.font().setBold(1)
     
     def customEvent(self, ev):
-        self.setText(ev.key().text())
+        self.setText(str(tuple(ev.key())))
 
 class _ShortcutTableDelegate(QtGui.QItemDelegate):
     def __init__(self, *args):

@@ -8,7 +8,13 @@ __version__ = "$Revision$"
 #TODO: plugin system for paramboxcontroller
 #TODO: unify weird keyboard shorts and regular qt. Support for emacs-type shortcuts?
 #TODO: find a good way to highlight selected ParamBox
-#FIXME: Adding release to long shortcuts
+#FIXME: keyhandler.py: Update SpecialKeyEvent to GestureEvent
+#TODO: shortcuteditor: Create new UI
+#TODO: find out how them actions is going to be triggered w/ GestureEvents.  
+#Need to read up some on what can be the fastest
+#Maybe GestureEvents=>centralDict=>callbackMethod
+#Might even do GestureEvent.__init__=>SIGNAL("findCallbackFromLabel", self)=>
+#obj.registerCallback("label" self.callback) => GestureEvent.dict["label", callback]
 
 """A system for creating OSC sending (and receiving) guis.
 
@@ -19,6 +25,8 @@ protocol.  With hopefully as little work as possible (we
 all know this is not true) it can create apps with all the bells 
 & whistles we know from ordinary programs: Keyboard shortcuts, fancy widgets and
 state saving (presets).
+<a href='<?php echo $item['link']; ?>' 
+title='<?php echo $item['title']; ?>'>
 
 """
 
@@ -47,6 +55,10 @@ if not os.path.exists(RCDIR):
 sys.path.append(os.path.join(sys.path[0], "larmwidgets"))
 
 MainUI, dummy = uic.loadUiType(os.path.join(sys.path[0], "forms/main.ui"))
+class MyApplication(QtGui.QApplication):
+    def __init__(self, *args):
+        QtGui.QApplication.__init__(self, *args)
+
 
 class MainWindow(MainUI, QtGui.QMainWindow):
 
@@ -96,7 +108,7 @@ class MainWindow(MainUI, QtGui.QMainWindow):
         self.projectContainer.closeProject()
         self.close()
     
-a = QtGui.QApplication(sys.argv)
+a = MyApplication(sys.argv)
 win = MainWindow()
 win.show()
 sys.exit(a.exec_())

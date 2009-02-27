@@ -331,6 +331,8 @@ class ProjectContainer(QtCore.QObject):
         ShortcutEditor(self.shortcuts, self._mainwindow).show()
 
     def remapShortcuts(self, key=None, old=None, new=None):
+        """Adding shortcut mappings, deleting old ones."""
+
         if key is not None:
             if old in self._shortcutRemap:
                 self._shortcutRemap[old].discard(key)
@@ -338,6 +340,8 @@ class ProjectContainer(QtCore.QObject):
         else:
             self._shortcutRemap = {}
             [self.remapShortcuts(k, None, v) for k, v in self.shortcuts.getSettings().items()]
+
+        #FIXME: announce new shortcuts to the system.
     
     def handleSpecialKey(self, ev):
         try:

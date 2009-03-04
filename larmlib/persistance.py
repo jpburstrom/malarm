@@ -38,7 +38,7 @@ class _AbstractSettings(QtCore.QObject):
     def setdefault(self, key, default=None):
         """Get settings key, or set and return a default if not existing.
 
-        @param key str -- settings key
+        @param key  -- settings key
         @param default -- value if key doesn't exist
         """
         self._dict.setdefault(key, default)

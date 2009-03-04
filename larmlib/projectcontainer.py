@@ -16,7 +16,7 @@ from larmwidgets.paramwidgets import AbstractParamWidget
 from persistance import SettingsHandler, PresetHandler
 from shortcuteditor import ShortcutEditor
 from standardactions import StandardActions
-from globals import *
+import globals 
 from param import Bang, IntParam
 from paramfactory import ParamFactory
 from qtosc import Emitter, OscHelper
@@ -82,14 +82,14 @@ class ProjectContainer(QtCore.QObject):
 
         ###############
         #Global Settings
-        self._settings = SettingsHandler(os.path.join(RCDIR, "larmrc"))
+        self._settings = SettingsHandler(os.path.join(globals.RCDIR, "larmrc"))
         self._projects = self._settings.get("projects", ["default"])
         self._currentProject = self._settings.get("currentProject", self._projects[0])
         self.connect(QtGui.qApp, QtCore.SIGNAL("registerSettingsKey"), self.registerSettingsKey)
 
         ###############
         #Presets
-        self.presets = PresetHandler(os.path.join(RCDIR, self._currentProject, "presets.py"))
+        self.presets = PresetHandler(os.path.join(globals.RCDIR, self._currentProject, "presets.py"))
         self.connect(QtGui.qApp, QtCore.SIGNAL("init"), self.presets.recallPresets)
         self.connect(QtGui.qApp, QtCore.SIGNAL(
             "savePreset(const QString &, const QString &, PyQt_PyObject)"), self.presets.savePreset)
@@ -103,10 +103,9 @@ class ProjectContainer(QtCore.QObject):
         
         ###############
         #Keyboard shortcuts
-        self.shortcuts = SettingsHandler(os.path.join(RCDIR, self._currentProject, "shortcuts.py"))
+        self.shortcuts = SettingsHandler(os.path.join(globals.RCDIR, self._currentProject, "shortcuts.py"))
         self.connect(self._mainwindow.actionEdit_Shortcuts, QtCore.SIGNAL(
             "activated()"), self.showShortcutEditor)
-        self._shortcutRemap = {}
         self.connect(self.shortcuts, QtCore.SIGNAL("settingsEdited"), self.remapShortcuts)
 
         self.standardActions = StandardActions(self._mainwindow)
@@ -141,6 +140,8 @@ class ProjectContainer(QtCore.QObject):
         #Run Designer signal
         self.designer = None #QProcess in spe
         self.connect(self._mainwindow.actionEdit_Ui, QtCore.SIGNAL("activated()"), self.runDesigner)
+
+        self.connect(QtGui.qApp, QtCore.SIGNAL("gestureActivated"), self.handleGesture)
 
         self.oscServer = OscHelper()
         self.oscServer.start()
@@ -292,7 +293,7 @@ class ProjectContainer(QtCore.QObject):
     def initProjects(self):
 
         QtGui.qApp.emit(QtCore.SIGNAL("clearOscReceivers"))
-        self.projectPath = os.path.join(RCDIR, self._currentProject)
+        self.projectPath = os.path.join(globals.RCDIR, self._currentProject)
         if not os.path.exists(self.projectPath):
             os.mkdir(self.projectPath)
         #self.parameditor.setFilename(os.path.join(self.projectPath, "params.py"))
@@ -334,23 +335,20 @@ class ProjectContainer(QtCore.QObject):
         """Adding shortcut mappings, deleting old ones."""
 
         if key is not None:
-            if old in self._shortcutRemap:
-                self._shortcutRemap[old].discard(key)
-            self._shortcutRemap.setdefault(new, set()).add(key)
+            QtGui.qApp.emit(QtCore.SIGNAL("unregisterGesture"), old)
+            QtGui.qApp.emit(QtCore.SIGNAL("registerGesture"), key, new)
         else:
-            self._shortcutRemap = {}
             [self.remapShortcuts(k, None, v) for k, v in self.shortcuts.getSettings().items()]
 
         #FIXME: announce new shortcuts to the system.
     
-    def handleSpecialKey(self, ev):
+    def handleGesture(self, text):
+        """Handle gestureActivated signal."""
         try:
-            for p in self._shortcutRemap.get(unicode(ev.key().text())):
-                try:
-                    self._params.get(p).setState()
-                except AttributeError:
-                    QtGui.qApp.emit(QtCore.SIGNAL("standardParamActivated"), p)
-                    pass
+            self._params.get(text).setState()
+        except AttributeError:
+            QtGui.qApp.emit(QtCore.SIGNAL("standardParamActivated"), p)
+            pass
         except TypeError:
             pass
 

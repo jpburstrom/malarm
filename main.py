@@ -6,15 +6,9 @@ __version__ = "$Revision$"
 #TODO: action groups for edit actions -- disable in "performance mode"
 #TODO: Update and add docs
 #TODO: plugin system for paramboxcontroller
-#TODO: unify weird keyboard shorts and regular qt. Support for emacs-type shortcuts?
 #TODO: find a good way to highlight selected ParamBox
-#FIXME: keyhandler.py: Update SpecialKeyEvent to GestureEvent
 #TODO: shortcuteditor: Create new UI
-#TODO: find out how them actions is going to be triggered w/ GestureEvents.  
-#Need to read up some on what can be the fastest
-#Maybe GestureEvents=>centralDict=>callbackMethod
-#Might even do GestureEvent.__init__=>SIGNAL("findCallbackFromLabel", self)=>
-#obj.registerCallback("label" self.callback) => GestureEvent.dict["label", callback]
+#FIXME: grab mouse/wheel/kbd when defining new shortcuts
 
 """A system for creating OSC sending (and receiving) guis.
 
@@ -25,9 +19,6 @@ protocol.  With hopefully as little work as possible (we
 all know this is not true) it can create apps with all the bells 
 & whistles we know from ordinary programs: Keyboard shortcuts, fancy widgets and
 state saving (presets).
-<a href='<?php echo $item['link']; ?>' 
-title='<?php echo $item['title']; ?>'>
-
 """
 
 
@@ -44,7 +35,7 @@ from PyQt4 import QtGui, QtCore, uic
 
 from larmlib.param import *
 from larmlib.projectcontainer import ProjectContainer
-from larmlib.keyhandler import *
+from larmlib.gesture import *
 from larmlib.globals import *
 
 #rpdb2.start_embedded_debugger("d")
@@ -58,14 +49,13 @@ MainUI, dummy = uic.loadUiType(os.path.join(sys.path[0], "forms/main.ui"))
 class MyApplication(QtGui.QApplication):
     def __init__(self, *args):
         QtGui.QApplication.__init__(self, *args)
-
-
+        
 class MainWindow(MainUI, QtGui.QMainWindow):
 
     def __init__(self, *args):  
         QtGui.QMainWindow.__init__(self, *args)
 
-        self.installEventFilter(KeyHandler(self))
+        self.installEventFilter(GestureEventHandler(self))
 
         self.setupUi(self) #Setup main window
 
@@ -99,10 +89,6 @@ class MainWindow(MainUI, QtGui.QMainWindow):
     def mouseReleaseEvent(self, ev):
         self.selecting = False
         self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-
-    def customEvent(self, ev):
-        if isinstance(ev, SpecialKeyEvent):
-            self.projectContainer.handleSpecialKey(ev)
 
     def quit(self):
         self.projectContainer.closeProject()
